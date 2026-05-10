@@ -1,5 +1,5 @@
 import json
-from ai.claude_client import call_claude
+from ai.gemini_client import call_gemini
 from database.queries import insert_alert
 
 SYSTEM = "You are a clinical pharmacist assistant helping a non-medical family caregiver understand medication safety."
@@ -65,7 +65,7 @@ async def check_drug_interactions(patient: dict, medications: list) -> str:
         medication_list=med_list,
     )
 
-    raw = await call_claude(prompt, system=SYSTEM)
+    raw = await call_gemini(f"{SYSTEM}\n\n{prompt}")
     raw = raw.strip()
     if raw.startswith("```"):
         raw = raw.split("```")[1]

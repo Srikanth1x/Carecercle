@@ -24,7 +24,7 @@ async def supabase_register(email: str, password: str) -> dict | None:
             json={"email": email, "password": password},
             headers=_headers()
         )
-    return r.json() if r.status_code in (200, 201) else None
+    return r.json()
 
 async def get_user_from_token(token: str) -> dict | None:
     async with httpx.AsyncClient() as client:
