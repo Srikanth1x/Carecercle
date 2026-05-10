@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareCircle — Create Account</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-xl shadow w-full max-w-md">
+
+    <a href="/" class="text-blue-700 font-bold text-lg block mb-6">💙 CareCircle</a>
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Create your account</h1>
+    <p class="text-sm text-gray-500 mb-6">Free forever. No credit card needed.</p>
+
+    {% if error %}
+      <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded mb-4">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/register" onsubmit="return checkPasswords()">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+      <input name="email" id="email" type="email" required autocomplete="email"
+             class="w-full border rounded-lg px-3 py-2 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+
+      <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+      <input name="password" id="password" type="password" required minlength="6"
+             class="w-full border rounded-lg px-3 py-2 mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+
+      <label class="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
+      <input id="confirm" type="password" required
+             class="w-full border rounded-lg px-3 py-2 mb-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <p id="pw-error" class="text-red-500 text-xs mb-4 hidden">Passwords do not match.</p>
+
+      <button type="submit"
+              class="w-full bg-blue-700 text-white py-2.5 rounded-lg font-medium hover:bg-blue-800 transition mt-2">
+        Create account
+      </button>
+    </form>
+
+    <p class="text-sm text-center mt-5 text-gray-500">
+      Already have an account? <a href="/login" class="text-blue-600 underline">Login</a>
+    </p>
+  </div>
+
+  <script>
+    function checkPasswords() {
+      const pw = document.getElementById('password').value;
+      const cf = document.getElementById('confirm').value;
+      const err = document.getElementById('pw-error');
+      if (pw !== cf) {
+        err.classList.remove('hidden');
+        return false;
+      }
+      err.classList.add('hidden');
+      return true;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareCircle — {% block title %}Dashboard{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <nav class="bg-blue-700 text-white px-6 py-3 flex items-center gap-6 shadow">
+    <span class="font-bold text-lg">💙 CareCircle</span>
+    <a href="/dashboard" class="hover:underline text-sm">Dashboard</a>
+    <a href="/medications" class="hover:underline text-sm">Medications</a>
+    <a href="/labs" class="hover:underline text-sm">Labs</a>
+    <a href="/timeline" class="hover:underline text-sm">Timeline</a>
+    <a href="/alerts" class="hover:underline text-sm">Alerts</a>
+    <span class="ml-auto">
+      <a href="/logout" class="text-sm opacity-75 hover:opacity-100 hover:underline">Logout</a>
+    </span>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

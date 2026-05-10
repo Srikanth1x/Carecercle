@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareCircle — Health coordination for caregivers</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-gray-800">
+
+  <!-- Nav -->
+  <nav class="border-b px-6 py-4 flex items-center justify-between">
+    <span class="font-bold text-blue-700 text-xl">💙 CareCircle</span>
+    <div class="flex gap-4">
+      <a href="/login" class="text-sm text-gray-600 hover:text-blue-700">Login</a>
+      <a href="/register" class="text-sm bg-blue-700 text-white px-4 py-1.5 rounded-lg hover:bg-blue-800">Get started</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="max-w-3xl mx-auto px-6 py-20 text-center">
+    <h1 class="text-4xl font-bold text-gray-900 mb-4">
+      Manage a parent's health<br class="hidden md:block"> from anywhere in India
+    </h1>
+    <p class="text-lg text-gray-500 mb-8">
+      CareCircle connects caregivers, health records, and AI — so you always know
+      what's happening with your loved one, even when you're miles away.
+    </p>
+    <div class="flex gap-4 justify-center">
+      <a href="/register" class="bg-blue-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-800">
+        Create free account
+      </a>
+      <a href="/login" class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50">
+        Login
+      </a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="bg-gray-50 py-16">
+    <div class="max-w-4xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+      <div class="text-center">
+        <div class="text-4xl mb-3">🤖</div>
+        <h3 class="font-semibold text-lg mb-2">AI-powered parsing</h3>
+        <p class="text-sm text-gray-500">Send prescription photos, lab PDFs, or voice notes in Hindi or English — we extract and structure everything automatically.</p>
+      </div>
+      <div class="text-center">
+        <div class="text-4xl mb-3">💊</div>
+        <h3 class="font-semibold text-lg mb-2">Drug interaction alerts</h3>
+        <p class="text-sm text-gray-500">Get alerted instantly when medications from different doctors could interact — before a problem occurs.</p>
+      </div>
+      <div class="text-center">
+        <div class="text-4xl mb-3">📋</div>
+        <h3 class="font-semibold text-lg mb-2">Daily health briefings</h3>
+        <p class="text-sm text-gray-500">Every morning at 7 AM, receive a plain-language summary of your parent's health status on Telegram.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="max-w-3xl mx-auto px-6 py-16">
+    <h2 class="text-2xl font-bold text-center mb-10">How it works</h2>
+    <div class="space-y-6">
+      <div class="flex items-start gap-4">
+        <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-sm shrink-0">1</span>
+        <div>
+          <div class="font-semibold">Create your account</div>
+          <div class="text-sm text-gray-500">Register at this website and link your patient profile (your parent).</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-sm shrink-0">2</span>
+        <div>
+          <div class="font-semibold">Connect Telegram</div>
+          <div class="text-sm text-gray-500">Send <code class="bg-gray-100 px-1 rounded">/connect</code> to the CareCircle bot on Telegram to link your account.</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-sm shrink-0">3</span>
+        <div>
+          <div class="font-semibold">Send health updates</div>
+          <div class="text-sm text-gray-500">Forward prescription photos, lab reports, caregiver messages, or voice notes directly to the bot.</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-sm shrink-0">4</span>
+        <div>
+          <div class="font-semibold">View the full picture</div>
+          <div class="text-sm text-gray-500">Check the dashboard anytime for a complete health overview — medications, labs, alerts, appointments.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t py-6 text-center text-sm text-gray-400">
+    CareCircle — Built for Indian family caregivers &bull; ABDM-compatible data model
+  </footer>
+
+</body>
+</html>

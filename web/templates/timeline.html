@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Care Timeline{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">📋 Care Timeline</h1>
+
+<div class="flex gap-2 mb-4 flex-wrap">
+  <button onclick="filterEvents('all')" class="filter-btn active px-3 py-1 rounded-full bg-blue-600 text-white text-sm">All</button>
+  <button onclick="filterEvents('symptom')" class="filter-btn px-3 py-1 rounded-full bg-gray-200 text-sm">Symptoms</button>
+  <button onclick="filterEvents('medication_taken')" class="filter-btn px-3 py-1 rounded-full bg-gray-200 text-sm">Medications</button>
+  <button onclick="filterEvents('meal')" class="filter-btn px-3 py-1 rounded-full bg-gray-200 text-sm">Meals</button>
+  <button onclick="filterEvents('observation')" class="filter-btn px-3 py-1 rounded-full bg-gray-200 text-sm">Observations</button>
+</div>
+
+<div class="space-y-3" id="events-list">
+  {% for e in events %}
+  <div class="event-card bg-white rounded-xl shadow p-4" data-type="{{ e.event_type }}">
+    <div class="flex justify-between items-start">
+      <div>
+        <span class="font-semibold {% if e.severity == 'urgent' %}text-red-600{% elif e.severity == 'attention' %}text-amber-600{% else %}text-blue-600{% endif %}">
+          {{ e.event_type.replace("_", " ").title() }}
+        </span>
+        <span class="text-xs ml-2 bg-gray-100 text-gray-500 px-2 py-0.5 rounded">{{ e.source_type or "system" }}</span>
+        {% if e.source_language and e.source_language != "en" %}
+          <span class="text-xs ml-1 bg-blue-50 text-blue-500 px-2 py-0.5 rounded">{{ e.source_language }}</span>
+        {% endif %}
+      </div>
+      <span class="text-xs text-gray-400">{{ e.event_timestamp[:16] }}</span>
+    </div>
+    <p class="text-sm text-gray-700 mt-1">{{ e.event_description }}</p>
+    <div class="text-xs text-gray-400 mt-1">Reported by: {{ e.reported_by }}</div>
+  </div>
+  {% else %}
+  <p class="text-gray-400">No events recorded.</p>
+  {% endfor %}
+</div>
+{% endblock %}

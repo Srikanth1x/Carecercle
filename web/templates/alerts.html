@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Alerts{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">🔔 Active Alerts</h1>
+
+{% if alerts %}
+  <div class="space-y-4">
+    {% for a in alerts %}
+    <div class="bg-white rounded-xl shadow p-5 border-l-4
+      {% if a.severity in ['critical', 'severe'] %}border-red-500
+      {% elif a.severity in ['warning', 'moderate'] %}border-amber-400
+      {% else %}border-blue-400{% endif %}">
+
+      <div class="flex justify-between items-start">
+        <div>
+          <span class="font-bold text-gray-800">{{ a.title }}</span>
+          <span class="ml-2 text-xs px-2 py-0.5 rounded-full
+            {% if a.severity in ['critical', 'severe'] %}bg-red-100 text-red-700
+            {% elif a.severity in ['warning', 'moderate'] %}bg-amber-100 text-amber-700
+            {% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ a.severity.upper() }}
+          </span>
+        </div>
+        <button onclick="acknowledgeAlert('{{ a.id }}')"
+          class="text-sm text-gray-400 hover:text-green-600 border border-gray-200 px-3 py-1 rounded">
+          Acknowledge
+        </button>
+      </div>
+
+      <p class="text-sm text-gray-600 mt-2">{{ a.description }}</p>
+
+      {% if a.recommendation %}
+        <div class="mt-2 text-sm bg-blue-50 text-blue-800 px-3 py-2 rounded">
+          💡 {{ a.recommendation }}
+        </div>
+      {% endif %}
+
+      <p class="text-xs text-gray-400 mt-2">Created: {{ a.created_at[:16] }}</p>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="bg-green-50 rounded-xl p-8 text-center">
+    <p class="text-green-700 font-semibold text-lg">✅ No active alerts</p>
+    <p class="text-green-600 text-sm mt-1">Everything looks good right now.</p>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Patient Header -->
+<div class="bg-white rounded-xl shadow p-5 mb-6 flex items-start justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-blue-700">{{ patient.full_name }}</h1>
+    <p class="text-sm text-gray-500">
+      ABHA: {{ patient.abha_id }} &bull;
+      {{ patient.address_city }}, {{ patient.address_state }} &bull;
+      Blood Group: {{ patient.blood_group or "N/A" }}
+    </p>
+    <p class="text-sm mt-1">
+      Conditions:
+      {% for c in patient.known_conditions or [] %}
+        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs mr-1">{{ c }}</span>
+      {% endfor %}
+    </p>
+  </div>
+  <div class="text-right">
+    {% if status == "critical" %}
+      <span class="bg-red-100 text-red-700 font-bold px-3 py-1 rounded-full">🚨 Critical</span>
+    {% elif status == "warning" %}
+      <span class="bg-amber-100 text-amber-700 font-bold px-3 py-1 rounded-full">⚠️ Needs Attention</span>
+    {% else %}
+      <span class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-full">✅ All Good</span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Active Alerts Banner -->
+{% if alerts %}
+<div class="bg-amber-50 border border-amber-300 rounded-xl p-4 mb-6">
+  <h2 class="font-semibold text-amber-800 mb-2">⚠️ Active Alerts ({{ alerts|length }})</h2>
+  {% for a in alerts[:3] %}
+    <div class="text-sm text-amber-900 mb-1">• {{ a.title }}</div>
+  {% endfor %}
+  {% if alerts|length > 3 %}<a href="/alerts" class="text-sm text-blue-600 underline">View all</a>{% endif %}
+</div>
+{% endif %}
+
+<!-- Summary Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <a href="/medications" class="bg-white rounded-xl shadow p-4 text-center hover:shadow-md">
+    <div class="text-3xl font-bold text-blue-600">{{ meds|length }}</div>
+    <div class="text-sm text-gray-500 mt-1">Active Medications</div>
+  </a>
+  <a href="/labs" class="bg-white rounded-xl shadow p-4 text-center hover:shadow-md">
+    <div class="text-3xl font-bold {% if labs|selectattr('is_abnormal')|list %}text-red-500{% else %}text-green-600{% endif %}">
+      {{ labs|selectattr('is_abnormal')|list|length }}
+    </div>
+    <div class="text-sm text-gray-500 mt-1">Abnormal Lab Values</div>
+  </a>
+  <a href="/alerts" class="bg-white rounded-xl shadow p-4 text-center hover:shadow-md">
+    <div class="text-3xl font-bold {% if alerts %}text-amber-500{% else %}text-green-600{% endif %}">{{ alerts|length }}</div>
+    <div class="text-sm text-gray-500 mt-1">Active Alerts</div>
+  </a>
+  <a href="/timeline" class="bg-white rounded-xl shadow p-4 text-center hover:shadow-md">
+    <div class="text-3xl font-bold text-blue-600">{{ events|length }}</div>
+    <div class="text-sm text-gray-500 mt-1">Events (72h)</div>
+  </a>
+</div>
+
+<!-- Upcoming Appointments -->
+{% if appts %}
+<div class="bg-white rounded-xl shadow p-5 mb-6">
+  <h2 class="font-semibold text-lg mb-3">🗓️ Upcoming Appointments</h2>
+  {% for a in appts %}
+    <div class="flex justify-between items-start py-2 border-b last:border-0">
+      <div>
+        <div class="font-medium">{{ a.appointment_date[:10] }} — Dr. {{ a.doctors.name if a.doctors else "N/A" }}</div>
+        <div class="text-sm text-gray-500">{{ a.hospital or (a.doctors.hospital if a.doctors else "") }}</div>
+        {% if a.prerequisites %}
+          <div class="text-sm mt-1">
+            {% if a.prerequisite_status == "pending" %}
+              <span class="text-amber-600">⚠️ Pending: {{ a.prerequisites|join(", ") }}</span>
+            {% else %}
+              <span class="text-green-600">✅ Prerequisites done</span>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+      <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{{ a.appointment_type or "Follow-up" }}</span>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Recent Events -->
+<div class="bg-white rounded-xl shadow p-5">
+  <h2 class="font-semibold text-lg mb-3">📝 Recent Events</h2>
+  {% if events %}
+    {% for e in events[:5] %}
+      <div class="py-2 border-b last:border-0 text-sm">
+        <span class="{% if e.severity == 'urgent' %}text-red-600{% elif e.severity == 'attention' %}text-amber-600{% else %}text-gray-600{% endif %} font-medium">
+          {{ e.event_type.replace("_", " ").title() }}
+        </span>
+        — {{ e.event_description }}
+        <span class="text-gray-400 text-xs ml-2">{{ e.event_timestamp[:16] }}</span>
+      </div>
+    {% endfor %}
+    <a href="/timeline" class="text-blue-600 text-sm underline mt-2 block">View full timeline →</a>
+  {% else %}
+    <p class="text-gray-400 text-sm">No recent events.</p>
+  {% endif %}
+</div>
+{% endblock %}
