@@ -11,8 +11,9 @@ def set_bot(bot):
     global _bot
     _bot = bot
 
-async def send_daily_briefing():
-    if not _bot:
+async def send_daily_briefing(bot=None):
+    b = bot or _bot
+    if not b:
         return
     from ai.briefing_generator import generate_briefing
     for profile in get_all_linked_users():
@@ -21,7 +22,7 @@ async def send_daily_briefing():
             if not patient:
                 continue
             text = await generate_briefing(patient["id"])
-            await _bot.send_message(
+            await b.send_message(
                 chat_id=profile["telegram_chat_id"],
                 text=text,
                 parse_mode="Markdown"
@@ -29,8 +30,9 @@ async def send_daily_briefing():
         except Exception:
             pass
 
-async def check_task_nudges():
-    if not _bot:
+async def check_task_nudges(bot=None):
+    b = bot or _bot
+    if not b:
         return
     from database.queries import get_upcoming_appointments
     from datetime import datetime
@@ -50,12 +52,13 @@ async def check_task_nudges():
                         f"Prerequisites needed: {prereqs}\n\n"
                         "These haven't been done yet. Please schedule them soon."
                     )
-                    await _bot.send_message(chat_id=profile["telegram_chat_id"], text=msg)
+                    await b.send_message(chat_id=profile["telegram_chat_id"], text=msg)
         except Exception:
             pass
 
-async def check_silence():
-    if not _bot:
+async def check_silence(bot=None):
+    b = bot or _bot
+    if not b:
         return
     from database.queries import get_recent_care_events
     for profile in get_all_linked_users():
@@ -65,7 +68,7 @@ async def check_silence():
                 continue
             events = get_recent_care_events(patient["id"], hours=48)
             if not events:
-                await _bot.send_message(
+                await b.send_message(
                     chat_id=profile["telegram_chat_id"],
                     text="⚠️ No caregiver updates in 48+ hours. Please check in with the caregiver."
                 )

@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Request, Depends, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 import os
 
+from config.settings import CRON_SECRET
 from web.auth import (
     supabase_login, supabase_register, require_user,
     set_session_cookie, clear_session_cookie, RedirectException
@@ -19,9 +20,25 @@ app = FastAPI(title="CareCircle")
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
+# ---- Telegram PTB singleton (webhook mode) ----
+
+_ptb_app = None
+
+async def _get_ptb_app():
+    global _ptb_app
+    if _ptb_app is None:
+        from bot.main import create_app
+        _ptb_app = create_app()
+        await _ptb_app.initialize()
+    return _ptb_app
+
+# ---- Exception handler ----
+
 @app.exception_handler(RedirectException)
 async def redirect_exception_handler(request, exc):
     return RedirectResponse(url=exc.url)
+
+# ---- Helpers ----
 
 def get_patient_data(user: dict) -> dict | None:
     patient = get_patient_by_user_id(user["id"])
@@ -38,6 +55,13 @@ def get_patient_data(user: dict) -> dict | None:
     status = "critical" if has_critical else ("warning" if has_warning else "ok")
     return dict(patient=patient, meds=meds, labs=labs, alerts=alerts,
                 events=events, appts=appts, status=status)
+
+def _check_cron_auth(request: Request) -> bool:
+    """Vercel sends Authorization: Bearer <CRON_SECRET> for cron jobs."""
+    if not CRON_SECRET:
+        return True  # No secret configured — allow (dev mode)
+    auth = request.headers.get("authorization", "")
+    return auth == f"Bearer {CRON_SECRET}"
 
 # ---- Public routes ----
 
@@ -72,7 +96,7 @@ async def register_page(request: Request):
 async def register_submit(request: Request, email: str = Form(...), password: str = Form(...)):
     result = await supabase_register(email, password)
     if not result or result.get("error") or result.get("code"):
-        msg = result.get("msg") or result.get("message") or "Registration failed. Try a stronger password."
+        msg = (result.get("msg") or result.get("message") if result else None) or "Registration failed. Try a stronger password."
         return templates.TemplateResponse("register.html", {"request": request, "error": msg})
     return RedirectResponse("/login?registered=1", status_code=303)
 
@@ -81,6 +105,46 @@ async def logout():
     response = RedirectResponse("/login")
     clear_session_cookie(response)
     return response
+
+# ---- Telegram webhook ----
+
+@app.post("/webhook")
+async def telegram_webhook(request: Request):
+    from telegram import Update
+    ptb = await _get_ptb_app()
+    data = await request.json()
+    update = Update.de_json(data, ptb.bot)
+    await ptb.process_update(update)
+    return Response(status_code=200)
+
+# ---- Vercel cron endpoints ----
+
+@app.get("/cron/briefing")
+async def cron_briefing(request: Request):
+    if not _check_cron_auth(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    from bot.scheduler import send_daily_briefing
+    ptb = await _get_ptb_app()
+    await send_daily_briefing(bot=ptb.bot)
+    return {"ok": True}
+
+@app.get("/cron/nudges")
+async def cron_nudges(request: Request):
+    if not _check_cron_auth(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    from bot.scheduler import check_task_nudges
+    ptb = await _get_ptb_app()
+    await check_task_nudges(bot=ptb.bot)
+    return {"ok": True}
+
+@app.get("/cron/silence")
+async def cron_silence(request: Request):
+    if not _check_cron_auth(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    from bot.scheduler import check_silence
+    ptb = await _get_ptb_app()
+    await check_silence(bot=ptb.bot)
+    return {"ok": True}
 
 # ---- Protected routes ----
 
