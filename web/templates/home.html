@@ -3,97 +3,363 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CareCircle — Health coordination for caregivers</title>
+  <title>CareCircle — Health coordination for remote caregivers</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(45,212,191,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(45,212,191,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .arch-box {
+      border: 1px solid rgba(45,212,191,0.35);
+      background: #18181b;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 0.8rem;
+      color: #d4d4d8;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .arch-line {
+      width: 2px;
+      background: rgba(45,212,191,0.35);
+      margin: 0 auto;
+    }
+    .arch-hline {
+      height: 2px;
+      background: rgba(45,212,191,0.35);
+    }
+    .arch-arrow-down::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid rgba(45,212,191,0.6);
+      margin: 0 auto;
+    }
+    .arch-arrow-right::after {
+      content: '';
+      display: inline-block;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 6px solid rgba(45,212,191,0.6);
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+  </style>
 </head>
-<body class="bg-white text-gray-800">
+<body class="bg-zinc-950 text-zinc-100">
 
   <!-- Nav -->
-  <nav class="border-b px-6 py-4 flex items-center justify-between">
-    <span class="font-bold text-blue-700 text-xl">💙 CareCircle</span>
-    <div class="flex gap-4">
-      <a href="/login" class="text-sm text-gray-600 hover:text-blue-700">Login</a>
-      <a href="/register" class="text-sm bg-blue-700 text-white px-4 py-1.5 rounded-lg hover:bg-blue-800">Get started</a>
+  <nav class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur px-6 py-4 flex items-center justify-between">
+    <span class="font-semibold text-teal-400 text-base tracking-tight">CareCircle</span>
+    <div class="flex items-center gap-3">
+      <a href="/login" class="text-sm text-zinc-300 hover:text-white px-3 py-1.5 rounded border border-zinc-700 hover:border-zinc-500 transition-colors">Login</a>
+      <a href="/register" class="text-sm bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium px-4 py-1.5 rounded transition-colors">Get Started</a>
     </div>
   </nav>
 
   <!-- Hero -->
-  <section class="max-w-3xl mx-auto px-6 py-20 text-center">
-    <h1 class="text-4xl font-bold text-gray-900 mb-4">
-      Manage a parent's health<br class="hidden md:block"> from anywhere in India
-    </h1>
-    <p class="text-lg text-gray-500 mb-8">
-      CareCircle connects caregivers, health records, and AI — so you always know
-      what's happening with your loved one, even when you're miles away.
-    </p>
-    <div class="flex gap-4 justify-center">
-      <a href="/register" class="bg-blue-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-800">
-        Create free account
-      </a>
-      <a href="/login" class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50">
-        Login
-      </a>
-    </div>
-  </section>
-
-  <!-- Features -->
-  <section class="bg-gray-50 py-16">
-    <div class="max-w-4xl mx-auto px-6 grid md:grid-cols-3 gap-8">
-      <div class="text-center">
-        <div class="text-4xl mb-3">🤖</div>
-        <h3 class="font-semibold text-lg mb-2">AI-powered parsing</h3>
-        <p class="text-sm text-gray-500">Send prescription photos, lab PDFs, or voice notes in Hindi or English — we extract and structure everything automatically.</p>
+  <section class="hero-grid relative">
+    <div class="max-w-4xl mx-auto px-6 py-24 text-center">
+      <div class="inline-block bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-medium px-3 py-1 rounded-full mb-6 tracking-wide uppercase">
+        ABDM-Compatible
       </div>
-      <div class="text-center">
-        <div class="text-4xl mb-3">💊</div>
-        <h3 class="font-semibold text-lg mb-2">Drug interaction alerts</h3>
-        <p class="text-sm text-gray-500">Get alerted instantly when medications from different doctors could interact — before a problem occurs.</p>
-      </div>
-      <div class="text-center">
-        <div class="text-4xl mb-3">📋</div>
-        <h3 class="font-semibold text-lg mb-2">Daily health briefings</h3>
-        <p class="text-sm text-gray-500">Every morning at 7 AM, receive a plain-language summary of your parent's health status on Telegram.</p>
+      <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight mb-5">
+        Complete health visibility<br class="hidden md:block"> for families caring from a distance.
+      </h1>
+      <p class="text-lg text-zinc-400 max-w-2xl mx-auto mb-8 leading-relaxed">
+        CareCircle structures prescriptions, lab reports, and caregiver updates into a single picture — built on Ayushman Bharat Digital Mission data standards, so every record is ready for India's national health infrastructure.
+      </p>
+      <div class="flex gap-4 justify-center flex-wrap">
+        <a href="/register" class="bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium px-6 py-3 rounded-lg transition-colors">
+          Open Dashboard
+        </a>
+        <a href="https://github.com/Srikanth1x/Carecercle" target="_blank" rel="noopener"
+           class="border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white px-6 py-3 rounded-lg transition-colors">
+          View on GitHub
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- How it works -->
-  <section class="max-w-3xl mx-auto px-6 py-16">
-    <h2 class="text-2xl font-bold text-center mb-10">How it works</h2>
-    <div class="space-y-6">
-      <div class="flex items-start gap-4">
-        <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-sm shrink-0">1</span>
-        <div>
-          <div class="font-semibold">Create your account</div>
-          <div class="text-sm text-gray-500">Register at this website and link your patient profile (your parent).</div>
+  <!-- Problem -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">The Problem</p>
+      <h2 class="text-2xl font-bold text-white text-center mb-12">
+        A parent with three doctors and no single source of truth
+      </h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-zinc-900 border-l-2 border-teal-500 rounded-r-lg p-5">
+          <h3 class="font-semibold text-white mb-2">Prescriptions arrive as photos</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">Handwritten prescriptions forwarded on WhatsApp. No version history. No way to know if a dosage changed.</p>
         </div>
-      </div>
-      <div class="flex items-start gap-4">
-        <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-sm shrink-0">2</span>
-        <div>
-          <div class="font-semibold">Connect Telegram</div>
-          <div class="text-sm text-gray-500">Send <code class="bg-gray-100 px-1 rounded">/connect</code> to the CareCircle bot on Telegram to link your account.</div>
+        <div class="bg-zinc-900 border-l-2 border-teal-500 rounded-r-lg p-5">
+          <h3 class="font-semibold text-white mb-2">Lab reports live in three apps</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">Each hospital has its own portal. Trend tracking across visits requires manual comparison across PDFs.</p>
         </div>
-      </div>
-      <div class="flex items-start gap-4">
-        <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-sm shrink-0">3</span>
-        <div>
-          <div class="font-semibold">Send health updates</div>
-          <div class="text-sm text-gray-500">Forward prescription photos, lab reports, caregiver messages, or voice notes directly to the bot.</div>
-        </div>
-      </div>
-      <div class="flex items-start gap-4">
-        <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-full text-sm shrink-0">4</span>
-        <div>
-          <div class="font-semibold">View the full picture</div>
-          <div class="text-sm text-gray-500">Check the dashboard anytime for a complete health overview — medications, labs, alerts, appointments.</div>
+        <div class="bg-zinc-900 border-l-2 border-teal-500 rounded-r-lg p-5">
+          <h3 class="font-semibold text-white mb-2">No doctor sees the full list</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">The cardiologist does not know what the endocrinologist prescribed. Drug interactions get missed — until they cause harm.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <footer class="border-t py-6 text-center text-sm text-gray-400">
-    CareCircle — Built for Indian family caregivers &bull; ABDM-compatible data model
+  <!-- AI Technology -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">Intelligence</p>
+      <h2 class="text-2xl font-bold text-white text-center mb-4">Two-tier processing, one coherent picture</h2>
+      <p class="text-sm text-zinc-400 text-center mb-12 max-w-xl mx-auto">Raw inputs go through a fast extraction layer first. Structured data then reaches the reasoning layer. This keeps the system accurate and cost-efficient.</p>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <!-- Tier 1 -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="bg-zinc-800 border border-zinc-700 text-teal-400 text-xs font-bold px-2 py-0.5 rounded">TIER 1</span>
+            <span class="text-white font-semibold">Gemini Flash</span>
+            <span class="text-zinc-500 text-xs ml-auto">~80% of work</span>
+          </div>
+          <ul class="space-y-2 text-sm text-zinc-400">
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> OCR on prescription photos</li>
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> PDF lab report extraction</li>
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> Voice note transcription</li>
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> Hindi, English, and Hinglish detection</li>
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> Structured JSON output for each input type</li>
+          </ul>
+        </div>
+        <!-- Tier 2 -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="bg-zinc-800 border border-zinc-700 text-teal-400 text-xs font-bold px-2 py-0.5 rounded">TIER 2</span>
+            <span class="text-white font-semibold">Claude Sonnet</span>
+            <span class="text-zinc-500 text-xs ml-auto">~20% of work</span>
+          </div>
+          <ul class="space-y-2 text-sm text-zinc-400">
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> Drug interaction analysis across all active medications</li>
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> Daily plain-language morning briefing</li>
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> Crisis detection and response</li>
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> Appointment gap detection</li>
+            <li class="flex gap-2"><span class="text-teal-500 mt-0.5">+</span> Deviation detection (wrong timing, missed dose)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Rule callout -->
+      <div class="bg-zinc-800 border border-zinc-700 rounded-lg px-5 py-4 text-sm text-zinc-300 text-center">
+        Raw input never reaches the reasoning layer. Gemini parses first, Claude reasons over structured JSON. This keeps the reasoning layer accurate and API costs minimal.
+      </div>
+    </div>
+  </section>
+
+  <!-- Blockchain / Consent -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="md:flex gap-12 items-start">
+        <div class="flex-1 mb-8 md:mb-0">
+          <span class="inline-block text-xs font-medium text-zinc-500 uppercase tracking-widest border border-zinc-700 px-2 py-0.5 rounded mb-4">V2 Roadmap</span>
+          <h2 class="text-2xl font-bold text-white mb-4">Immutable consent and audit chain</h2>
+          <p class="text-zinc-400 text-sm leading-relaxed mb-4">
+            The ABDM data model is designed for blockchain-anchored consent. Every data access is logged to a consent table today. In V2, consent artifacts will be anchored to a distributed ledger, making it cryptographically impossible to retroactively modify who accessed which record or when.
+          </p>
+          <p class="text-zinc-400 text-sm leading-relaxed">
+            Records are versioned and never deleted. When a prescription changes, the old version is marked superseded and the full history is preserved with its ABHA ID linkage intact.
+          </p>
+        </div>
+        <div class="flex-shrink-0 md:w-72">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
+            <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">Data architecture principles</div>
+            <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">Consent-gated access</div>
+            <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">FHIR-compatible record types</div>
+            <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">Versioned, never deleted</div>
+            <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">ABHA ID as universal key</div>
+            <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">Full audit trail per record</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">Workflow</p>
+      <h2 class="text-2xl font-bold text-white text-center mb-14">How it works</h2>
+
+      <div class="grid md:grid-cols-4 gap-0 relative">
+        <!-- connector line -->
+        <div class="hidden md:block absolute top-8 left-[12.5%] right-[12.5%] h-px bg-zinc-700"></div>
+
+        <div class="relative text-center px-4 mb-8 md:mb-0">
+          <div class="w-14 h-14 rounded-full bg-zinc-900 border border-teal-500/40 text-teal-400 font-bold text-lg flex items-center justify-center mx-auto mb-4 relative z-10">1</div>
+          <h3 class="font-semibold text-white text-sm mb-2">Send</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">Forward a prescription photo, lab PDF, voice note, or text message via Telegram bot</p>
+        </div>
+
+        <div class="relative text-center px-4 mb-8 md:mb-0">
+          <div class="w-14 h-14 rounded-full bg-zinc-900 border border-teal-500/40 text-teal-400 font-bold text-lg flex items-center justify-center mx-auto mb-4 relative z-10">2</div>
+          <h3 class="font-semibold text-white text-sm mb-2">Parse</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">Gemini extracts structured data. Each record is tagged with ABHA ID and ABDM record type automatically</p>
+        </div>
+
+        <div class="relative text-center px-4 mb-8 md:mb-0">
+          <div class="w-14 h-14 rounded-full bg-zinc-900 border border-teal-500/40 text-teal-400 font-bold text-lg flex items-center justify-center mx-auto mb-4 relative z-10">3</div>
+          <h3 class="font-semibold text-white text-sm mb-2">Analyze</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">Claude checks drug interactions, detects gaps, and generates the 7 AM morning briefing</p>
+        </div>
+
+        <div class="relative text-center px-4">
+          <div class="w-14 h-14 rounded-full bg-zinc-900 border border-teal-500/40 text-teal-400 font-bold text-lg flex items-center justify-center mx-auto mb-4 relative z-10">4</div>
+          <h3 class="font-semibold text-white text-sm mb-2">Act</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">Alerts arrive on Telegram. The full health picture is available on the web dashboard at any time</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture Diagram -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">System Design</p>
+      <h2 class="text-2xl font-bold text-white text-center mb-14">Architecture</h2>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-8 overflow-x-auto">
+        <div class="min-w-[520px]">
+
+          <!-- Row 1: inputs -->
+          <div class="flex justify-center gap-3 mb-1">
+            <div class="arch-box">Photo / PDF</div>
+            <div class="arch-box">Voice Note</div>
+            <div class="arch-box">Text Message</div>
+          </div>
+
+          <!-- arrow down -->
+          <div class="flex justify-center my-1">
+            <div class="flex flex-col items-center">
+              <div class="arch-line h-5"></div>
+              <div class="arch-arrow-down"></div>
+            </div>
+          </div>
+
+          <!-- Row 2: Telegram -->
+          <div class="flex justify-center mb-1">
+            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Telegram Bot (@CarCercle_Bot)</div>
+          </div>
+
+          <!-- arrow down -->
+          <div class="flex justify-center my-1">
+            <div class="flex flex-col items-center">
+              <div class="arch-line h-5"></div>
+              <div class="arch-arrow-down"></div>
+            </div>
+          </div>
+
+          <!-- Row 3: Gemini + right arrow to Supabase -->
+          <div class="flex items-center justify-center gap-3 mb-1">
+            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Gemini Flash (Tier 1 — Parse)</div>
+            <div class="flex items-center gap-1 text-zinc-600 text-xs">
+              <div class="arch-hline w-8"></div>
+              <div class="arch-arrow-right"></div>
+            </div>
+            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Supabase / PostgreSQL</div>
+          </div>
+
+          <!-- arrow down (left side — gemini to claude) and right side supabase to dashboard -->
+          <div class="flex items-start justify-center gap-3 my-1">
+            <div class="flex flex-col items-center" style="width: 220px;">
+              <div class="arch-line h-5"></div>
+              <div class="arch-arrow-down"></div>
+            </div>
+            <div style="width: 75px;"></div>
+            <div class="flex flex-col items-center" style="width: 220px;">
+              <div class="arch-line h-5"></div>
+              <div class="arch-arrow-down"></div>
+            </div>
+          </div>
+
+          <!-- Row 4: Claude + right arrow to Dashboard -->
+          <div class="flex items-center justify-center gap-3 mb-1">
+            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Claude Sonnet (Tier 2 — Reason)</div>
+            <div class="flex items-center gap-1 text-zinc-600 text-xs">
+              <div class="arch-hline w-8"></div>
+              <div class="arch-arrow-right"></div>
+            </div>
+            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Web Dashboard</div>
+          </div>
+
+          <!-- arrow down (claude to ABDM) -->
+          <div class="flex justify-center my-1">
+            <div class="flex flex-col items-center" style="width: 220px;">
+              <div class="arch-line h-5"></div>
+              <div class="arch-arrow-down"></div>
+            </div>
+          </div>
+
+          <!-- Row 5: ABDM Layer -->
+          <div class="flex justify-center">
+            <div class="arch-box border-teal-400/80 text-teal-300 font-medium px-6">
+              ABDM Layer: ABHA ID + FHIR Record Types + Consent Log
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="flex flex-wrap gap-4 mt-6 justify-center">
+        <div class="flex items-center gap-2 text-xs text-zinc-400">
+          <div class="w-3 h-3 rounded border border-teal-400/60"></div>
+          Core processing nodes
+        </div>
+        <div class="flex items-center gap-2 text-xs text-zinc-400">
+          <div class="w-3 h-3 rounded border border-zinc-600"></div>
+          Input and storage
+        </div>
+        <div class="flex items-center gap-2 text-xs text-zinc-400">
+          <div class="w-8 h-px bg-zinc-600"></div>
+          Data flow
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact / Footer -->
+  <footer class="border-t border-zinc-800 py-14">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="grid md:grid-cols-3 gap-8 mb-10">
+        <div>
+          <div class="font-semibold text-teal-400 mb-2">CareCircle</div>
+          <p class="text-sm text-zinc-500 leading-relaxed">Health coordination for working professionals managing aging parents' care from a distance.</p>
+        </div>
+        <div>
+          <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">Links</div>
+          <div class="space-y-2">
+            <a href="/register" class="block text-sm text-zinc-400 hover:text-teal-400 transition-colors">Dashboard</a>
+            <a href="https://github.com/Srikanth1x/Carecercle" target="_blank" rel="noopener" class="block text-sm text-zinc-400 hover:text-teal-400 transition-colors">GitHub</a>
+            <a href="/login" class="block text-sm text-zinc-400 hover:text-teal-400 transition-colors">Login</a>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">Contact</div>
+          <a href="mailto:srikanthkarkampally01@gmail.com" class="text-sm text-zinc-400 hover:text-teal-400 transition-colors break-all">
+            srikanthkarkampally01@gmail.com
+          </a>
+        </div>
+      </div>
+      <div class="border-t border-zinc-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
+        <p class="text-xs text-zinc-600">Built on ABDM standards. Not a medical device.</p>
+        <p class="text-xs text-zinc-600">CareCircle 2026</p>
+      </div>
+    </div>
   </footer>
 
 </body>

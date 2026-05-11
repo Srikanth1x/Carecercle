@@ -1,3 +1,36 @@
 body { font-family: system-ui, sans-serif; }
-.filter-btn.active { background-color: #2563eb; color: white; }
+
+:root {
+  --cc-bg: #09090b;
+  --cc-surface: #18181b;
+  --cc-border: #3f3f46;
+  --cc-accent: #2dd4bf;
+}
+
+/* Dark form inputs */
+input, select, textarea {
+  background-color: #27272a;
+  border-color: #3f3f46;
+  color: #f4f4f5;
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #2dd4bf;
+  outline-offset: 0;
+  border-color: #2dd4bf;
+}
+input::placeholder, textarea::placeholder {
+  color: #71717a;
+}
+
+/* Timeline filter buttons */
+.filter-btn.active { background-color: #14b8a6; color: #09090b; }
 .event-card.hidden { display: none; }
+
+/* Architecture diagram arrows */
+.arch-arrow {
+  display: flex;
+  align-items: center;
+  color: #2dd4bf;
+  font-size: 1.25rem;
+  justify-content: center;
+}

@@ -3,30 +3,30 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-  <h1 class="text-2xl font-bold mb-6">🏥 Add Patient Profile</h1>
+  <h1 class="text-2xl font-bold text-white mb-6">Add Patient Profile</h1>
 
   {% if error %}
-    <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{{ error }}</div>
+    <div class="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg mb-4">{{ error }}</div>
   {% endif %}
 
-  <form method="POST" action="/patient/add" class="bg-white rounded-xl shadow p-6 space-y-5">
+  <form method="POST" action="/patient/add" class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-5">
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+      <label class="block text-sm font-medium text-zinc-300 mb-1">Full Name <span class="text-red-400">*</span></label>
       <input name="full_name" type="text" required placeholder="e.g. Rajesh Sharma"
-             class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+             class="w-full rounded-lg px-3 py-2 text-sm border" />
     </div>
 
     <div class="grid grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+        <label class="block text-sm font-medium text-zinc-300 mb-1">Date of Birth</label>
         <input name="date_of_birth" type="date"
-               class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+               class="w-full rounded-lg px-3 py-2 text-sm border" />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-        <select name="gender" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-          <option value="">— Select —</option>
+        <label class="block text-sm font-medium text-zinc-300 mb-1">Gender</label>
+        <select name="gender" class="w-full rounded-lg px-3 py-2 text-sm border">
+          <option value="">-- Select --</option>
           <option>Male</option>
           <option>Female</option>
           <option>Other</option>
@@ -36,9 +36,9 @@
 
     <div class="grid grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Blood Group</label>
-        <select name="blood_group" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-          <option value="">— Select —</option>
+        <label class="block text-sm font-medium text-zinc-300 mb-1">Blood Group</label>
+        <select name="blood_group" class="w-full rounded-lg px-3 py-2 text-sm border">
+          <option value="">-- Select --</option>
           <option>A+</option><option>A-</option>
           <option>B+</option><option>B-</option>
           <option>AB+</option><option>AB-</option>
@@ -46,50 +46,50 @@
         </select>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+        <label class="block text-sm font-medium text-zinc-300 mb-1">Phone</label>
         <input name="phone" type="tel" placeholder="+91-9800000001"
-               class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+               class="w-full rounded-lg px-3 py-2 text-sm border" />
       </div>
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Known Conditions</label>
+      <label class="block text-sm font-medium text-zinc-300 mb-1">Known Conditions</label>
       <input name="known_conditions" type="text" placeholder="e.g. Type 2 Diabetes, Hypertension"
-             class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      <p class="text-xs text-gray-400 mt-1">Comma-separated</p>
+             class="w-full rounded-lg px-3 py-2 text-sm border" />
+      <p class="text-xs text-zinc-600 mt-1">Comma-separated</p>
     </div>
 
     <div class="grid grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+        <label class="block text-sm font-medium text-zinc-300 mb-1">City</label>
         <input name="address_city" type="text" placeholder="e.g. Lucknow"
-               class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+               class="w-full rounded-lg px-3 py-2 text-sm border" />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+        <label class="block text-sm font-medium text-zinc-300 mb-1">State</label>
         <input name="address_state" type="text" placeholder="e.g. Uttar Pradesh"
-               class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+               class="w-full rounded-lg px-3 py-2 text-sm border" />
       </div>
     </div>
 
-    <hr class="border-gray-100" />
-    <p class="text-sm font-semibold text-gray-600">Emergency Contact (Caregiver)</p>
+    <hr class="border-zinc-800" />
+    <p class="text-sm font-semibold text-zinc-400">Emergency Contact (Caregiver)</p>
 
     <div class="grid grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
+        <label class="block text-sm font-medium text-zinc-300 mb-1">Contact Name</label>
         <input name="emergency_contact_name" type="text" placeholder="e.g. Meera Sharma"
-               class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+               class="w-full rounded-lg px-3 py-2 text-sm border" />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
+        <label class="block text-sm font-medium text-zinc-300 mb-1">Contact Phone</label>
         <input name="emergency_contact_phone" type="tel" placeholder="+91-9800000002"
-               class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+               class="w-full rounded-lg px-3 py-2 text-sm border" />
       </div>
     </div>
 
     <button type="submit"
-            class="w-full bg-blue-700 text-white py-2.5 rounded-lg font-medium hover:bg-blue-800 transition">
+            class="w-full bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium py-2.5 rounded-lg transition-colors">
       Create Patient Profile
     </button>
   </form>

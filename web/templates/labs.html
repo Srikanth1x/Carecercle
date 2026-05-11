@@ -3,43 +3,43 @@
 
 {% block content %}
 <div class="flex items-center justify-between mb-4">
-  <h1 class="text-2xl font-bold">🔬 Lab Results</h1>
+  <h1 class="text-2xl font-bold text-white">Lab Results</h1>
   <a href="/labs/add"
-     class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+     class="bg-teal-500 hover:bg-teal-400 text-zinc-950 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
     + Add Lab Result
   </a>
 </div>
 
-<div class="bg-white rounded-xl shadow overflow-x-auto">
+<div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-x-auto">
   <table class="w-full text-sm">
-    <thead class="bg-blue-50 text-blue-800">
+    <thead class="bg-zinc-800 text-zinc-400">
       <tr>
-        <th class="p-3 text-left">Test</th>
-        <th class="p-3 text-left">Value</th>
-        <th class="p-3 text-left">Unit</th>
-        <th class="p-3 text-left">Reference</th>
-        <th class="p-3 text-left">Status</th>
-        <th class="p-3 text-left">Date</th>
+        <th class="p-3 text-left font-medium">Test</th>
+        <th class="p-3 text-left font-medium">Value</th>
+        <th class="p-3 text-left font-medium">Unit</th>
+        <th class="p-3 text-left font-medium">Reference</th>
+        <th class="p-3 text-left font-medium">Status</th>
+        <th class="p-3 text-left font-medium">Date</th>
       </tr>
     </thead>
     <tbody>
       {% for l in labs %}
-      <tr class="border-t hover:bg-gray-50 {% if l.is_abnormal %}bg-red-50{% endif %}">
-        <td class="p-3 font-medium">{{ l.test_name }}</td>
-        <td class="p-3 font-bold {% if l.is_abnormal %}text-red-600{% else %}text-green-700{% endif %}">{{ l.test_value }}</td>
-        <td class="p-3 text-gray-500">{{ l.unit or "—" }}</td>
-        <td class="p-3 text-gray-500">{{ l.reference_range or "—" }}</td>
+      <tr class="border-t border-zinc-800 hover:bg-zinc-800/50 transition-colors {% if l.is_abnormal %}bg-red-500/5{% endif %}">
+        <td class="p-3 font-medium text-zinc-200">{{ l.test_name }}</td>
+        <td class="p-3 font-bold {% if l.is_abnormal %}text-red-400{% else %}text-emerald-400{% endif %}">{{ l.test_value }}</td>
+        <td class="p-3 text-zinc-500">{{ l.unit or "--" }}</td>
+        <td class="p-3 text-zinc-500">{{ l.reference_range or "--" }}</td>
         <td class="p-3">
           {% if l.is_abnormal %}
-            <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">⚠️ Abnormal</span>
+            <span class="bg-red-500/10 border border-red-500/30 text-red-400 px-2 py-0.5 rounded-full text-xs">Abnormal</span>
           {% else %}
-            <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">✅ Normal</span>
+            <span class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded-full text-xs">Normal</span>
           {% endif %}
         </td>
-        <td class="p-3 text-gray-400">{{ l.test_date }}</td>
+        <td class="p-3 text-zinc-600">{{ l.test_date }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="6" class="p-4 text-gray-400 text-center">No lab results. <a href="/labs/add" class="text-blue-600 underline">Add one</a>.</td></tr>
+      <tr><td colspan="6" class="p-6 text-zinc-500 text-center">No lab results. <a href="/labs/add" class="text-teal-400 hover:text-teal-300">Add one</a>.</td></tr>
       {% endfor %}
     </tbody>
   </table>

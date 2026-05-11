@@ -3,42 +3,42 @@
 
 {% block content %}
 <div class="flex items-center justify-between mb-4">
-  <h1 class="text-2xl font-bold">📋 Care Timeline</h1>
+  <h1 class="text-2xl font-bold text-white">Care Timeline</h1>
   <a href="/events/add"
-     class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+     class="bg-teal-500 hover:bg-teal-400 text-zinc-950 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
     + Add Event
   </a>
 </div>
 
 <div class="flex gap-2 mb-4 flex-wrap">
-  <button onclick="filterEvents('all')" class="filter-btn active px-3 py-1 rounded-full bg-blue-600 text-white text-sm">All</button>
-  <button onclick="filterEvents('symptom')" class="filter-btn px-3 py-1 rounded-full bg-gray-200 text-sm">Symptoms</button>
-  <button onclick="filterEvents('medication_taken')" class="filter-btn px-3 py-1 rounded-full bg-gray-200 text-sm">Medications</button>
-  <button onclick="filterEvents('meal')" class="filter-btn px-3 py-1 rounded-full bg-gray-200 text-sm">Meals</button>
-  <button onclick="filterEvents('observation')" class="filter-btn px-3 py-1 rounded-full bg-gray-200 text-sm">Observations</button>
+  <button onclick="filterEvents('all')" class="filter-btn active px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm transition-colors">All</button>
+  <button onclick="filterEvents('symptom')" class="filter-btn px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 text-sm hover:text-zinc-200 transition-colors">Symptoms</button>
+  <button onclick="filterEvents('medication_taken')" class="filter-btn px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 text-sm hover:text-zinc-200 transition-colors">Medications</button>
+  <button onclick="filterEvents('meal')" class="filter-btn px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 text-sm hover:text-zinc-200 transition-colors">Meals</button>
+  <button onclick="filterEvents('observation')" class="filter-btn px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 text-sm hover:text-zinc-200 transition-colors">Observations</button>
 </div>
 
 <div class="space-y-3" id="events-list">
   {% for e in events %}
-  <div class="event-card bg-white rounded-xl shadow p-4" data-type="{{ e.event_type }}">
+  <div class="event-card bg-zinc-900 border border-zinc-800 rounded-xl p-4" data-type="{{ e.event_type }}">
     <div class="flex justify-between items-start">
       <div>
-        <span class="font-semibold {% if e.severity == 'urgent' %}text-red-600{% elif e.severity == 'attention' %}text-amber-600{% else %}text-blue-600{% endif %}">
+        <span class="font-semibold {% if e.severity == 'urgent' %}text-red-400{% elif e.severity == 'attention' %}text-amber-400{% else %}text-teal-400{% endif %}">
           {{ e.event_type.replace("_", " ").title() }}
         </span>
-        <span class="text-xs ml-2 bg-gray-100 text-gray-500 px-2 py-0.5 rounded">{{ e.source_type or "system" }}</span>
+        <span class="text-xs ml-2 bg-zinc-800 border border-zinc-700 text-zinc-500 px-2 py-0.5 rounded">{{ e.source_type or "system" }}</span>
         {% if e.source_language and e.source_language != "en" %}
-          <span class="text-xs ml-1 bg-blue-50 text-blue-500 px-2 py-0.5 rounded">{{ e.source_language }}</span>
+          <span class="text-xs ml-1 bg-teal-500/10 border border-teal-500/20 text-teal-500 px-2 py-0.5 rounded">{{ e.source_language }}</span>
         {% endif %}
       </div>
-      <span class="text-xs text-gray-400">{{ e.event_timestamp[:16] }}</span>
+      <span class="text-xs text-zinc-600">{{ e.event_timestamp[:16] }}</span>
     </div>
-    <p class="text-sm text-gray-700 mt-1">{{ e.event_description }}</p>
-    <div class="text-xs text-gray-400 mt-1">Reported by: {{ e.reported_by }}</div>
+    <p class="text-sm text-zinc-300 mt-1">{{ e.event_description }}</p>
+    <div class="text-xs text-zinc-600 mt-1">Reported by: {{ e.reported_by }}</div>
   </div>
   {% else %}
-  <div class="bg-white rounded-xl shadow p-8 text-center text-gray-400">
-    No events recorded yet. <a href="/events/add" class="text-blue-600 underline">Add one</a> or send a voice/text message to the bot.
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-500">
+    No events recorded yet. <a href="/events/add" class="text-teal-400 hover:text-teal-300">Add one</a> or send a voice or text message to the bot.
   </div>
   {% endfor %}
 </div>
