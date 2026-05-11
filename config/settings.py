@@ -19,6 +19,7 @@ TIMEZONE = os.getenv("TIMEZONE", "Asia/Kolkata")
 DAILY_BRIEFING_HOUR = int(os.getenv("DAILY_BRIEFING_HOUR", "7"))
 CRON_SECRET = os.getenv("CRON_SECRET")
 
-SESSION_SECRET = os.getenv("SESSION_SECRET")
+SESSION_SECRET = os.getenv("SESSION_SECRET", "")
 if not SESSION_SECRET:
-    raise RuntimeError("SESSION_SECRET env var is required — set it in .env or Vercel dashboard")
+    import logging
+    logging.getLogger(__name__).critical("SESSION_SECRET env var is not set — sessions will not work")
