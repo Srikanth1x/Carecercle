@@ -354,6 +354,15 @@ async def add_appointment_submit(
             "request": request, "error": str(e)
         })
 
+# ---- Appointments list ----
+
+@app.get("/appointments")
+async def appointments_page(request: Request, user: dict = Depends(require_user)):
+    data = get_patient_data(user)
+    if not data:
+        return RedirectResponse("/dashboard")
+    return templates.TemplateResponse("appointments.html", {"request": request, **data})
+
 # ---- Alerts ----
 
 @app.get("/alerts")

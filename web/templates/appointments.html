@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Appointments{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">🗓️ Appointments</h1>
+  <a href="/appointments/add"
+     class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+    + Add Appointment
+  </a>
+</div>
+
+<div class="space-y-3">
+  {% for a in appts %}
+  <div class="bg-white rounded-xl shadow p-4">
+    <div class="flex justify-between items-start">
+      <div>
+        <div class="font-semibold text-blue-700">
+          {{ a.appointment_date[:10] }} at {{ a.appointment_date[11:16] if a.appointment_date|length > 10 else "—" }}
+        </div>
+        <div class="text-sm text-gray-700 mt-1">
+          Dr. {{ a.doctors.name if a.doctors else "N/A" }}
+          {% if a.doctors and a.doctors.specialty %} — {{ a.doctors.specialty }}{% endif %}
+        </div>
+        {% if a.hospital or (a.doctors and a.doctors.hospital) %}
+          <div class="text-sm text-gray-500">{{ a.hospital or a.doctors.hospital }}</div>
+        {% endif %}
+        {% if a.notes %}
+          <div class="text-sm text-gray-500 mt-1 italic">{{ a.notes }}</div>
+        {% endif %}
+        {% if a.prerequisites %}
+          <div class="text-sm mt-1">
+            {% if a.prerequisite_status == "pending" %}
+              <span class="text-amber-600">⚠️ Pending: {{ a.prerequisites|join(", ") }}</span>
+            {% else %}
+              <span class="text-green-600">✅ Prerequisites done</span>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+      <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{{ a.appointment_type or "Follow-up" }}</span>
+    </div>
+  </div>
+  {% else %}
+  <div class="bg-white rounded-xl shadow p-8 text-center text-gray-400">
+    No upcoming appointments. <a href="/appointments/add" class="text-blue-600 underline">Add one</a>.
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
