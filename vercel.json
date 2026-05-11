@@ -7,6 +7,11 @@
       "config": { "maxLambdaSize": "50mb" }
     }
   ],
+  "functions": {
+    "web/app.py": {
+      "maxDuration": 300
+    }
+  },
   "routes": [
     { "src": "/static/(.*)", "dest": "/web/static/$1" },
     { "src": "/(.*)", "dest": "/web/app.py" }

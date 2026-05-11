@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from fastapi import FastAPI, Request, Depends, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -12,8 +14,11 @@ from web.auth import (
 from database.auth_queries import get_patient_by_user_id
 from database.queries import (
     get_active_medications, get_recent_lab_reports, get_active_alerts,
-    get_recent_care_events, get_upcoming_appointments, acknowledge_alert
+    get_recent_care_events, get_upcoming_appointments, acknowledge_alert,
+    get_alert_by_id
 )
+
+logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(__file__)
 app = FastAPI(title="CareCircle")
@@ -23,13 +28,16 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 # ---- Telegram PTB singleton (webhook mode) ----
 
 _ptb_app = None
+_ptb_lock = asyncio.Lock()
 
 async def _get_ptb_app():
     global _ptb_app
-    if _ptb_app is None:
-        from bot.main import create_app
-        _ptb_app = create_app()
-        await _ptb_app.initialize()
+    async with _ptb_lock:
+        if _ptb_app is None:
+            from bot.main import create_app
+            # Do NOT call initialize() — it opens a network connection
+            # only needed for polling mode, not webhook
+            _ptb_app = create_app()
     return _ptb_app
 
 # ---- Exception handler ----
@@ -57,9 +65,11 @@ def get_patient_data(user: dict) -> dict | None:
                 events=events, appts=appts, status=status)
 
 def _check_cron_auth(request: Request) -> bool:
-    """Vercel sends Authorization: Bearer <CRON_SECRET> for cron jobs."""
+    """Vercel sends Authorization: Bearer <CRON_SECRET> for cron jobs.
+    Fails CLOSED if CRON_SECRET is not configured."""
     if not CRON_SECRET:
-        return True  # No secret configured — allow (dev mode)
+        logger.error("CRON_SECRET is not set — rejecting cron request")
+        return False
     auth = request.headers.get("authorization", "")
     return auth == f"Bearer {CRON_SECRET}"
 
@@ -99,57 +109,20 @@ async def register_page(request: Request):
 
 @app.post("/register")
 async def register_submit(request: Request, email: str = Form(...), password: str = Form(...)):
-    result = await supabase_register(email, password)
+    try:
+        result = await supabase_register(email, password)
+    except ValueError as e:
+        return templates.TemplateResponse("register.html", {"request": request, "error": str(e)})
     if not result or result.get("error") or result.get("code"):
         msg = (result.get("msg") or result.get("message") if result else None) or "Registration failed. Try a stronger password."
         return templates.TemplateResponse("register.html", {"request": request, "error": msg})
     return RedirectResponse("/login?registered=1", status_code=303)
 
 @app.get("/logout")
-async def logout():
+async def logout(request: Request):
     response = RedirectResponse("/login")
     clear_session_cookie(response)
     return response
-
-# ---- Telegram webhook ----
-
-@app.post("/webhook")
-async def telegram_webhook(request: Request):
-    from telegram import Update
-    ptb = await _get_ptb_app()
-    data = await request.json()
-    update = Update.de_json(data, ptb.bot)
-    await ptb.process_update(update)
-    return Response(status_code=200)
-
-# ---- Vercel cron endpoints ----
-
-@app.get("/cron/briefing")
-async def cron_briefing(request: Request):
-    if not _check_cron_auth(request):
-        return JSONResponse({"error": "unauthorized"}, status_code=401)
-    from bot.scheduler import send_daily_briefing
-    ptb = await _get_ptb_app()
-    await send_daily_briefing(bot=ptb.bot)
-    return {"ok": True}
-
-@app.get("/cron/nudges")
-async def cron_nudges(request: Request):
-    if not _check_cron_auth(request):
-        return JSONResponse({"error": "unauthorized"}, status_code=401)
-    from bot.scheduler import check_task_nudges
-    ptb = await _get_ptb_app()
-    await check_task_nudges(bot=ptb.bot)
-    return {"ok": True}
-
-@app.get("/cron/silence")
-async def cron_silence(request: Request):
-    if not _check_cron_auth(request):
-        return JSONResponse({"error": "unauthorized"}, status_code=401)
-    from bot.scheduler import check_silence
-    ptb = await _get_ptb_app()
-    await check_silence(bot=ptb.bot)
-    return {"ok": True}
 
 # ---- Protected routes ----
 
@@ -190,5 +163,56 @@ async def alerts_page(request: Request, user: dict = Depends(require_user)):
 
 @app.post("/alerts/{alert_id}/acknowledge")
 async def ack_alert(alert_id: str, user: dict = Depends(require_user)):
+    # Verify the alert belongs to this user's patient before acknowledging (IDOR prevention)
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return JSONResponse({"error": "Not found"}, status_code=404)
+    alert = get_alert_by_id(alert_id)
+    if not alert or alert["patient_id"] != patient["id"]:
+        return JSONResponse({"error": "Not found"}, status_code=404)
     acknowledge_alert(alert_id)
+    return JSONResponse({"status": "ok"})
+
+# ---- Telegram webhook ----
+
+@app.post("/webhook")
+async def telegram_webhook(request: Request):
+    ptb = await _get_ptb_app()
+    body = await request.json()
+    from telegram import Update
+    update = Update.de_json(body, ptb.bot)
+    await ptb.process_update(update)
+    return JSONResponse({"ok": True})
+
+# ---- Cron endpoints ----
+
+@app.get("/cron/briefing")
+async def cron_briefing(request: Request):
+    if not _check_cron_auth(request):
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    ptb = await _get_ptb_app()
+    from bot.scheduler import send_daily_briefing
+    await send_daily_briefing(bot=ptb.bot)
+    return JSONResponse({"ok": True})
+
+@app.get("/cron/nudges")
+async def cron_nudges(request: Request):
+    if not _check_cron_auth(request):
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    ptb = await _get_ptb_app()
+    from bot.scheduler import check_task_nudges
+    await check_task_nudges(bot=ptb.bot)
+    return JSONResponse({"ok": True})
+
+@app.get("/cron/silence")
+async def cron_silence(request: Request):
+    if not _check_cron_auth(request):
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    ptb = await _get_ptb_app()
+    from bot.scheduler import check_silence
+    await check_silence(bot=ptb.bot)
+    return JSONResponse({"ok": True})
+
+@app.get("/health")
+async def health():
     return JSONResponse({"status": "ok"})

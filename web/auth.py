@@ -1,7 +1,10 @@
+import logging
 import httpx
 from fastapi import Request, Response
 from fastapi.responses import RedirectResponse
 from config.settings import SUPABASE_URL, SUPABASE_KEY
+
+logger = logging.getLogger(__name__)
 
 SUPABASE_AUTH_URL = f"{SUPABASE_URL}/auth/v1"
 
@@ -9,44 +12,69 @@ def _headers():
     return {"apikey": SUPABASE_KEY, "Content-Type": "application/json"}
 
 async def supabase_login(email: str, password: str) -> dict | None:
-    async with httpx.AsyncClient() as client:
-        r = await client.post(
-            f"{SUPABASE_AUTH_URL}/token?grant_type=password",
-            json={"email": email, "password": password},
-            headers=_headers()
-        )
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                f"{SUPABASE_AUTH_URL}/token?grant_type=password",
+                json={"email": email, "password": password},
+                headers=_headers(),
+                timeout=10.0,
+            )
+    except httpx.TimeoutException:
+        raise ValueError("Login service timed out. Please try again.")
+    except httpx.RequestError as e:
+        logger.error("Supabase login network error: %s", e)
+        raise ValueError("Could not reach login service. Please try again.")
+
     if r.status_code == 200:
         return r.json()
-    # Surface the real error message for debugging
+
     try:
         body = r.json()
-        raise ValueError(body.get("error_description") or body.get("msg") or body.get("message") or "Invalid email or password.")
-    except ValueError:
-        raise
+        msg = body.get("error_description") or body.get("msg") or body.get("message") or "Invalid email or password."
     except Exception:
-        return None
+        msg = "Invalid email or password."
+    raise ValueError(msg)
 
 async def supabase_register(email: str, password: str) -> dict | None:
-    async with httpx.AsyncClient() as client:
-        r = await client.post(
-            f"{SUPABASE_AUTH_URL}/signup",
-            json={"email": email, "password": password},
-            headers=_headers()
-        )
-    return r.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                f"{SUPABASE_AUTH_URL}/signup",
+                json={"email": email, "password": password},
+                headers=_headers(),
+                timeout=10.0,
+            )
+        return r.json()
+    except httpx.TimeoutException:
+        raise ValueError("Registration service timed out. Please try again.")
+    except httpx.RequestError as e:
+        logger.error("Supabase register network error: %s", e)
+        raise ValueError("Could not reach registration service. Please try again.")
 
 async def get_user_from_token(token: str) -> dict | None:
-    async with httpx.AsyncClient() as client:
-        r = await client.get(
-            f"{SUPABASE_AUTH_URL}/user",
-            headers={**_headers(), "Authorization": f"Bearer {token}"}
-        )
-    return r.json() if r.status_code == 200 else None
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.get(
+                f"{SUPABASE_AUTH_URL}/user",
+                headers={**_headers(), "Authorization": f"Bearer {token}"},
+                timeout=10.0,
+            )
+    except httpx.RequestError as e:
+        logger.error("Supabase token validation error: %s", e)
+        return None
+
+    if r.status_code != 200:
+        return None
+    user = r.json()
+    if not isinstance(user, dict) or "id" not in user:
+        return None
+    return user
 
 def set_session_cookie(response: Response, token: str) -> None:
     response.set_cookie(
         key="cc_token", value=token,
-        httponly=True, max_age=60 * 60 * 24 * 7, samesite="lax"
+        httponly=True, secure=True, max_age=60 * 60 * 24 * 7, samesite="lax"
     )
 
 def clear_session_cookie(response: Response) -> None:

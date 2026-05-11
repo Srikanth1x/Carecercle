@@ -1,6 +1,7 @@
-from datetime import datetime
+import logging
+from datetime import datetime, timezone
 
-_pending_logs: list = []
+logger = logging.getLogger(__name__)
 
 def log_access(patient_id: str, requester_name: str, requester_role: str,
                access_type: str, records_accessed: list) -> None:
@@ -14,9 +15,9 @@ def log_access(patient_id: str, requester_name: str, requester_role: str,
             "access_type": access_type,
             "records_accessed": records_accessed,
             "consent_status": "granted",
-            "granted_by": "Meera",
-            "granted_at": datetime.now().isoformat(),
+            "granted_by": "caregiver",
+            "granted_at": datetime.now(timezone.utc).isoformat(),
             "purpose": "CareCircle caregiver access"
         }).execute()
     except Exception:
-        pass
+        logger.warning("Failed to write consent log for patient %s", patient_id)
