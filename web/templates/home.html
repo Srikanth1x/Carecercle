@@ -53,6 +53,58 @@
       vertical-align: middle;
       margin-left: 2px;
     }
+    /* Layered architecture nodes */
+    .arch-node-input {
+      border: 1px solid rgba(161,161,170,0.3);
+      background: #27272a;
+      border-radius: 8px;
+      padding: 8px 14px;
+      text-align: center;
+      min-width: 100px;
+    }
+    .arch-node-title { font-size: 0.75rem; font-weight: 600; color: #f4f4f5; }
+    .arch-node-sub   { font-size: 0.65rem; color: #71717a; margin-top: 2px; }
+    .arch-layer {
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .arch-layer-abdm  { border: 1px solid rgba(45,212,191,0.35); background: rgba(45,212,191,0.04); }
+    .arch-layer-ai    { border: 1px solid rgba(168,85,247,0.35); background: rgba(168,85,247,0.04); }
+    .arch-layer-trust { border: 1px solid rgba(52,211,153,0.35); background: rgba(52,211,153,0.04); }
+    .arch-layer-label { font-size: 0.7rem; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.08em; text-align: center; }
+    .arch-node-layer {
+      border: 1px solid rgba(82,82,91,0.6);
+      background: #27272a;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.75rem;
+      color: #d4d4d8;
+      text-align: center;
+    }
+    .arch-node-output {
+      border-radius: 8px;
+      padding: 8px 14px;
+      text-align: center;
+      min-width: 100px;
+    }
+    .arch-out-green { border: 1px solid rgba(52,211,153,0.4); background: rgba(52,211,153,0.06); }
+    .arch-out-amber { border: 1px solid rgba(251,191,36,0.4); background: rgba(251,191,36,0.06); }
+    .arch-out-red   { border: 1px solid rgba(248,113,113,0.4); background: rgba(248,113,113,0.06); }
+    .arch-out-teal  { border: 1px solid rgba(45,212,191,0.4); background: rgba(45,212,191,0.06); }
+    .arch-arrow-center {
+      display: flex;
+      justify-content: center;
+      margin: 6px 0;
+    }
+    .arch-arrow-center::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid rgba(45,212,191,0.5);
+    }
   </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100">
@@ -325,105 +377,141 @@
       <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">System Design</p>
       <h2 class="text-2xl font-bold text-white text-center mb-14">Architecture</h2>
 
-      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-8 overflow-x-auto">
-        <div class="min-w-[520px]">
+      <div class="space-y-3 overflow-x-auto">
+        <div class="min-w-[560px]">
 
-          <!-- Row 1: inputs -->
-          <div class="flex justify-center gap-3 mb-1">
-            <div class="arch-box">Photo / PDF</div>
-            <div class="arch-box">Voice Note</div>
-            <div class="arch-box">Text Message</div>
-          </div>
-
-          <!-- arrow down -->
-          <div class="flex justify-center my-1">
-            <div class="flex flex-col items-center">
-              <div class="arch-line h-5"></div>
-              <div class="arch-arrow-down"></div>
+          <!-- INPUTS -->
+          <div class="mb-1">
+            <p class="text-xs text-zinc-500 text-center mb-3 uppercase tracking-widest">Inputs (raw data sources)</p>
+            <div class="flex justify-center gap-2 flex-wrap">
+              <div class="arch-node-input">
+                <div class="arch-node-title">Prescriptions</div>
+                <div class="arch-node-sub">WhatsApp photos</div>
+              </div>
+              <div class="arch-node-input">
+                <div class="arch-node-title">Lab Reports</div>
+                <div class="arch-node-sub">Hospital PDFs</div>
+              </div>
+              <div class="arch-node-input">
+                <div class="arch-node-title">Voice Notes</div>
+                <div class="arch-node-sub">Caregiver updates</div>
+              </div>
+              <div class="arch-node-input">
+                <div class="arch-node-title">Doctor Visits</div>
+                <div class="arch-node-sub">Verbal notes</div>
+              </div>
+              <div class="arch-node-input">
+                <div class="arch-node-title">Schedules</div>
+                <div class="arch-node-sub">Appointments</div>
+              </div>
             </div>
           </div>
 
-          <!-- Row 2: Telegram -->
-          <div class="flex justify-center mb-1">
-            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Telegram Bot (@CarCercle_Bot)</div>
+          <!-- arrow -->
+          <div class="arch-arrow-center"></div>
+
+          <!-- LAYER 1: ABDM -->
+          <div class="arch-layer arch-layer-abdm mb-1">
+            <div class="arch-layer-label">Layer 1 -- ABDM rails (data unification)</div>
+            <div class="flex justify-center gap-3 flex-wrap mt-3">
+              <div class="arch-node-layer">ABHA Health ID</div>
+              <div class="arch-node-layer">Health Records Link</div>
+              <div class="arch-node-layer">Consent Manager (HIE-CM)</div>
+            </div>
+            <p class="text-xs text-zinc-500 text-center mt-3">One ABHA ID -- all hospitals, all doctors, all records linked</p>
           </div>
 
-          <!-- arrow down -->
-          <div class="flex justify-center my-1">
-            <div class="flex flex-col items-center">
-              <div class="arch-line h-5"></div>
-              <div class="arch-arrow-down"></div>
+          <!-- arrow -->
+          <div class="arch-arrow-center"></div>
+
+          <!-- LAYER 2: AI Engine -->
+          <div class="arch-layer arch-layer-ai mb-1">
+            <div class="arch-layer-label">Layer 2 -- AI engine (reasoning + alerts)</div>
+            <div class="grid grid-cols-3 gap-2 mt-3">
+              <div class="arch-node-layer text-center">
+                <div class="font-medium text-white text-xs">OCR + NLP</div>
+                <div class="text-zinc-500 text-xs mt-0.5">Parse photos, PDFs</div>
+              </div>
+              <div class="arch-node-layer text-center">
+                <div class="font-medium text-white text-xs">Speech-to-text</div>
+                <div class="text-zinc-500 text-xs mt-0.5">Hindi + English</div>
+              </div>
+              <div class="arch-node-layer text-center">
+                <div class="font-medium text-white text-xs">Drug Interaction</div>
+                <div class="text-zinc-500 text-xs mt-0.5">Check conflicts</div>
+              </div>
+              <div class="arch-node-layer text-center">
+                <div class="font-medium text-white text-xs">Gap Detection</div>
+                <div class="text-zinc-500 text-xs mt-0.5">Missing tests, refills</div>
+              </div>
+              <div class="arch-node-layer text-center">
+                <div class="font-medium text-white text-xs">Conflict Resolver</div>
+                <div class="text-zinc-500 text-xs mt-0.5">3 sources -- truth</div>
+              </div>
+              <div class="arch-node-layer text-center">
+                <div class="font-medium text-white text-xs">Crisis Detector</div>
+                <div class="text-zinc-500 text-xs mt-0.5">2 AM mode</div>
+              </div>
             </div>
+            <p class="text-xs text-zinc-500 text-center mt-3">Gemini Flash parses -- Claude Sonnet reasons across all data</p>
           </div>
 
-          <!-- Row 3: Gemini + right arrow to Supabase -->
-          <div class="flex items-center justify-center gap-3 mb-1">
-            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Gemini Flash (Tier 1 — Parse)</div>
-            <div class="flex items-center gap-1 text-zinc-600 text-xs">
-              <div class="arch-hline w-8"></div>
-              <div class="arch-arrow-right"></div>
+          <!-- arrow -->
+          <div class="arch-arrow-center"></div>
+
+          <!-- LAYER 3: Trust + Audit -->
+          <div class="arch-layer arch-layer-trust mb-1">
+            <div class="arch-layer-label">Layer 3 -- Trust + audit trail</div>
+            <div class="flex justify-center gap-3 flex-wrap mt-3">
+              <div class="arch-node-layer">Consent Log</div>
+              <div class="arch-node-layer">Record Versioning</div>
+              <div class="arch-node-layer">Alert Audit Trail</div>
             </div>
-            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Supabase / PostgreSQL</div>
+            <p class="text-xs text-zinc-500 text-center mt-3">Immutable log: who accessed what, when, and what changed</p>
           </div>
 
-          <!-- arrow down (left side — gemini to claude) and right side supabase to dashboard -->
-          <div class="flex items-start justify-center gap-3 my-1">
-            <div class="flex flex-col items-center" style="width: 220px;">
-              <div class="arch-line h-5"></div>
-              <div class="arch-arrow-down"></div>
-            </div>
-            <div style="width: 75px;"></div>
-            <div class="flex flex-col items-center" style="width: 220px;">
-              <div class="arch-line h-5"></div>
-              <div class="arch-arrow-down"></div>
-            </div>
-          </div>
+          <!-- arrow -->
+          <div class="arch-arrow-center"></div>
 
-          <!-- Row 4: Claude + right arrow to Dashboard -->
-          <div class="flex items-center justify-center gap-3 mb-1">
-            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Claude Sonnet (Tier 2 — Reason)</div>
-            <div class="flex items-center gap-1 text-zinc-600 text-xs">
-              <div class="arch-hline w-8"></div>
-              <div class="arch-arrow-right"></div>
+          <!-- OUTPUTS -->
+          <div>
+            <p class="text-xs text-zinc-500 text-center mb-3 uppercase tracking-widest">Outputs (what the caregiver sees)</p>
+            <div class="flex justify-center gap-2 flex-wrap">
+              <div class="arch-node-output arch-out-green">
+                <div class="arch-node-title">Daily Briefing</div>
+                <div class="arch-node-sub">"Dad is okay"</div>
+              </div>
+              <div class="arch-node-output arch-out-amber">
+                <div class="arch-node-title">Smart Alerts</div>
+                <div class="arch-node-sub">Drug clash found</div>
+              </div>
+              <div class="arch-node-output arch-out-red">
+                <div class="arch-node-title">Crisis Card</div>
+                <div class="arch-node-sub">Meds + hospital</div>
+              </div>
+              <div class="arch-node-output arch-out-teal">
+                <div class="arch-node-title">Task Nudges</div>
+                <div class="arch-node-sub">Book blood test</div>
+              </div>
             </div>
-            <div class="arch-box border-teal-400/60 text-teal-300 font-medium">Web Dashboard</div>
-          </div>
-
-          <!-- arrow down (claude to ABDM) -->
-          <div class="flex justify-center my-1">
-            <div class="flex flex-col items-center" style="width: 220px;">
-              <div class="arch-line h-5"></div>
-              <div class="arch-arrow-down"></div>
-            </div>
-          </div>
-
-          <!-- Row 5: ABDM Layer -->
-          <div class="flex justify-center gap-3 flex-wrap">
-            <div class="arch-box border-teal-400/80 text-teal-300 font-medium">ABHA ID</div>
-            <div class="arch-box border-teal-400/80 text-teal-300 font-medium">UHI Gateway</div>
-            <div class="arch-box border-teal-400/80 text-teal-300 font-medium">HIE-CM Consent</div>
-            <div class="arch-box border-teal-400/80 text-teal-300 font-medium">FHIR R4</div>
-          </div>
-          <div class="flex justify-center mt-2">
-            <div class="text-xs text-zinc-500 text-center">ABDM / Ayushman Bharat Digital Mission (NHA)</div>
           </div>
 
         </div>
       </div>
 
       <!-- Legend -->
-      <div class="flex flex-wrap gap-4 mt-6 justify-center">
-        <div class="flex items-center gap-2 text-xs text-zinc-400">
-          <div class="w-3 h-3 rounded border border-teal-400/60"></div>
-          Core processing nodes
+      <div class="flex flex-wrap gap-6 mt-8 justify-center">
+        <div class="flex items-center gap-2 text-xs text-zinc-500">
+          <div class="w-3 h-3 rounded border border-teal-500/50 bg-teal-500/10"></div>
+          ABDM = government health data rails
         </div>
-        <div class="flex items-center gap-2 text-xs text-zinc-400">
-          <div class="w-3 h-3 rounded border border-zinc-600"></div>
-          Input and storage
+        <div class="flex items-center gap-2 text-xs text-zinc-500">
+          <div class="w-3 h-3 rounded border border-purple-500/50 bg-purple-500/10"></div>
+          AI = intelligence
         </div>
-        <div class="flex items-center gap-2 text-xs text-zinc-400">
-          <div class="w-8 h-px bg-zinc-600"></div>
-          Data flow
+        <div class="flex items-center gap-2 text-xs text-zinc-500">
+          <div class="w-3 h-3 rounded border border-emerald-500/50 bg-emerald-500/10"></div>
+          Trust = audit + consent
         </div>
       </div>
     </div>
