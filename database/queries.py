@@ -1,6 +1,8 @@
+import random
 from datetime import datetime, timedelta, timezone
 from database.supabase_client import get_client
 from abdm.consent import log_access
+
 
 def get_patient_for_telegram_user(telegram_chat_id: str) -> dict | None:
     """Resolve a Telegram chat_id to a patient dict. Returns None if not linked."""
@@ -10,11 +12,41 @@ def get_patient_for_telegram_user(telegram_chat_id: str) -> dict | None:
         return None
     return get_patient_by_user_id(profile["user_id"])
 
+
+def create_patient(user_id: str, data: dict) -> dict:
+    db = get_client()
+    name = data.get("full_name", "patient")
+    first = name.split()[0].lower()
+    abha_id = str(random.randint(10000000000000, 99999999999999))
+    abha_address = f"{first}.{random.randint(1000, 9999)}@carecircle"
+    record = {"user_id": user_id, "abha_id": abha_id, "abha_address": abha_address, **data}
+    result = db.table("patients").insert(record).execute()
+    if not result.data:
+        raise RuntimeError("Failed to create patient")
+    return result.data[0]
+
+
+def get_or_create_doctor(name: str, specialty: str = None, hospital: str = None) -> dict | None:
+    if not name or not name.strip():
+        return None
+    doctor = get_doctor_by_name(name.strip())
+    if doctor:
+        return doctor
+    db = get_client()
+    result = db.table("doctors").insert({
+        "name": name.strip(),
+        "specialty": specialty,
+        "hospital": hospital,
+    }).execute()
+    return result.data[0] if result.data else None
+
+
 def get_active_medications(patient_id: str) -> list:
     db = get_client()
     result = db.table("medications").select("*, doctors(name, specialty, phone)") \
         .eq("patient_id", patient_id).eq("status", "active").execute()
     return result.data
+
 
 def get_recent_lab_reports(patient_id: str, days: int = 90) -> list:
     db = get_client()
@@ -24,6 +56,7 @@ def get_recent_lab_reports(patient_id: str, days: int = 90) -> list:
         .order("test_date", desc=True).execute()
     return result.data
 
+
 def get_upcoming_appointments(patient_id: str) -> list:
     db = get_client()
     now = datetime.now(timezone.utc).isoformat()
@@ -31,6 +64,7 @@ def get_upcoming_appointments(patient_id: str) -> list:
         .eq("patient_id", patient_id).eq("status", "scheduled") \
         .gte("appointment_date", now).order("appointment_date").execute()
     return result.data
+
 
 def get_recent_care_events(patient_id: str, hours: int = 24) -> list:
     db = get_client()
@@ -40,6 +74,7 @@ def get_recent_care_events(patient_id: str, hours: int = 24) -> list:
         .order("event_timestamp", desc=True).execute()
     return result.data
 
+
 def get_active_alerts(patient_id: str) -> list:
     db = get_client()
     result = db.table("alerts").select("*") \
@@ -47,10 +82,12 @@ def get_active_alerts(patient_id: str) -> list:
         .order("created_at", desc=True).execute()
     return result.data
 
+
 def get_alert_by_id(alert_id: str) -> dict | None:
     db = get_client()
     result = db.table("alerts").select("id, patient_id, status").eq("id", alert_id).execute()
     return result.data[0] if result.data else None
+
 
 def insert_medication(patient_id: str, doctor_id: str, data: dict) -> dict:
     db = get_client()
@@ -70,6 +107,7 @@ def insert_medication(patient_id: str, doctor_id: str, data: dict) -> dict:
     log_access(patient_id, "system", "caregiver_app", "write", ["medications"])
     return {"action": "inserted", "data": result.data[0]}
 
+
 def insert_lab_report(patient_id: str, data: dict) -> dict:
     db = get_client()
     result = db.table("lab_reports").insert({"patient_id": patient_id, **data}).execute()
@@ -78,12 +116,22 @@ def insert_lab_report(patient_id: str, data: dict) -> dict:
     log_access(patient_id, "system", "caregiver_app", "write", ["lab_reports"])
     return result.data[0]
 
+
 def insert_care_event(patient_id: str, data: dict) -> dict:
     db = get_client()
     result = db.table("care_events").insert({"patient_id": patient_id, **data}).execute()
     if not result.data:
         raise RuntimeError("Failed to insert care event — Supabase returned no data")
     return result.data[0]
+
+
+def insert_appointment(patient_id: str, data: dict) -> dict:
+    db = get_client()
+    result = db.table("appointments").insert({"patient_id": patient_id, **data}).execute()
+    if not result.data:
+        raise RuntimeError("Failed to insert appointment — Supabase returned no data")
+    return result.data[0]
+
 
 def insert_alert(patient_id: str, data: dict) -> dict:
     db = get_client()
@@ -92,6 +140,7 @@ def insert_alert(patient_id: str, data: dict) -> dict:
         raise RuntimeError("Failed to insert alert — Supabase returned no data")
     return result.data[0]
 
+
 def acknowledge_alert(alert_id: str) -> None:
     db = get_client()
     db.table("alerts").update({
@@ -99,12 +148,14 @@ def acknowledge_alert(alert_id: str) -> None:
         "acknowledged_at": datetime.now(timezone.utc).isoformat()
     }).eq("id", alert_id).execute()
 
+
 def insert_daily_briefing(patient_id: str, data: dict) -> dict:
     db = get_client()
     result = db.table("daily_briefings").insert({"patient_id": patient_id, **data}).execute()
     if not result.data:
         raise RuntimeError("Failed to insert daily briefing — Supabase returned no data")
     return result.data[0]
+
 
 def get_doctor_by_name(name: str) -> dict | None:
     db = get_client()

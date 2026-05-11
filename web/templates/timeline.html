@@ -2,7 +2,13 @@
 {% block title %}Care Timeline{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">📋 Care Timeline</h1>
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">📋 Care Timeline</h1>
+  <a href="/events/add"
+     class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+    + Add Event
+  </a>
+</div>
 
 <div class="flex gap-2 mb-4 flex-wrap">
   <button onclick="filterEvents('all')" class="filter-btn active px-3 py-1 rounded-full bg-blue-600 text-white text-sm">All</button>
@@ -31,7 +37,9 @@
     <div class="text-xs text-gray-400 mt-1">Reported by: {{ e.reported_by }}</div>
   </div>
   {% else %}
-  <p class="text-gray-400">No events recorded.</p>
+  <div class="bg-white rounded-xl shadow p-8 text-center text-gray-400">
+    No events recorded yet. <a href="/events/add" class="text-blue-600 underline">Add one</a> or send a voice/text message to the bot.
+  </div>
   {% endfor %}
 </div>
 {% endblock %}

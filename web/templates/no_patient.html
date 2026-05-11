@@ -5,14 +5,22 @@
 <div class="bg-white rounded-xl shadow p-10 text-center max-w-lg mx-auto mt-12">
   <div class="text-5xl mb-4">🏥</div>
   <h1 class="text-xl font-bold text-blue-700 mb-3">No patient linked yet</h1>
-  <p class="text-gray-600 mb-2">
-    Your account is active, but no patient record is linked to it.
-  </p>
   <p class="text-gray-600 mb-6">
-    Open Telegram and send
-    <code class="bg-gray-100 text-blue-700 px-2 py-0.5 rounded font-mono">/connect</code>
-    to your CareCircle bot to link your account and add your patient.
+    Your account is active. Add your patient's profile to get started.
   </p>
-  <a href="/logout" class="text-sm text-gray-400 underline">Logout</a>
+
+  <a href="/patient/add"
+     class="block w-full bg-blue-700 text-white py-3 rounded-lg font-medium hover:bg-blue-800 transition mb-4">
+    + Add Patient Profile
+  </a>
+
+  <p class="text-sm text-gray-400 mb-2">Already have the web profile set up?</p>
+  <p class="text-sm text-gray-500">
+    Link Telegram by sending
+    <code class="bg-gray-100 text-blue-700 px-2 py-0.5 rounded font-mono">/connect</code>
+    to <strong>@CarCercle_Bot</strong>
+  </p>
+
+  <a href="/logout" class="text-sm text-gray-400 underline block mt-6">Logout</a>
 </div>
 {% endblock %}

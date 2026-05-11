@@ -63,10 +63,16 @@
 </div>
 
 <!-- Upcoming Appointments -->
-{% if appts %}
 <div class="bg-white rounded-xl shadow p-5 mb-6">
-  <h2 class="font-semibold text-lg mb-3">🗓️ Upcoming Appointments</h2>
-  {% for a in appts %}
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="font-semibold text-lg">🗓️ Upcoming Appointments</h2>
+    <a href="/appointments/add"
+       class="bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-800 transition">
+      + Add
+    </a>
+  </div>
+  {% if appts %}
+    {% for a in appts %}
     <div class="flex justify-between items-start py-2 border-b last:border-0">
       <div>
         <div class="font-medium">{{ a.appointment_date[:10] }} — Dr. {{ a.doctors.name if a.doctors else "N/A" }}</div>
@@ -83,13 +89,21 @@
       </div>
       <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{{ a.appointment_type or "Follow-up" }}</span>
     </div>
-  {% endfor %}
+    {% endfor %}
+  {% else %}
+    <p class="text-gray-400 text-sm">No upcoming appointments. <a href="/appointments/add" class="text-blue-600 underline">Add one</a>.</p>
+  {% endif %}
 </div>
-{% endif %}
 
 <!-- Recent Events -->
 <div class="bg-white rounded-xl shadow p-5">
-  <h2 class="font-semibold text-lg mb-3">📝 Recent Events</h2>
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="font-semibold text-lg">📝 Recent Events</h2>
+    <a href="/events/add"
+       class="bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-800 transition">
+      + Add
+    </a>
+  </div>
   {% if events %}
     {% for e in events[:5] %}
       <div class="py-2 border-b last:border-0 text-sm">
@@ -102,7 +116,7 @@
     {% endfor %}
     <a href="/timeline" class="text-blue-600 text-sm underline mt-2 block">View full timeline →</a>
   {% else %}
-    <p class="text-gray-400 text-sm">No recent events.</p>
+    <p class="text-gray-400 text-sm">No recent events. <a href="/events/add" class="text-blue-600 underline">Add one</a> or send a message to the bot.</p>
   {% endif %}
 </div>
 {% endblock %}

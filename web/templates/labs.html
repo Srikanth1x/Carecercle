@@ -2,7 +2,13 @@
 {% block title %}Lab Results{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">🔬 Lab Results</h1>
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">🔬 Lab Results</h1>
+  <a href="/labs/add"
+     class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+    + Add Lab Result
+  </a>
+</div>
 
 <div class="bg-white rounded-xl shadow overflow-x-auto">
   <table class="w-full text-sm">
@@ -33,7 +39,7 @@
         <td class="p-3 text-gray-400">{{ l.test_date }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="6" class="p-4 text-gray-400 text-center">No lab results found.</td></tr>
+      <tr><td colspan="6" class="p-4 text-gray-400 text-center">No lab results. <a href="/labs/add" class="text-blue-600 underline">Add one</a>.</td></tr>
       {% endfor %}
     </tbody>
   </table>

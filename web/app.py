@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, Request, Depends, Form
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse, RedirectResponse, Response
+from fastapi.responses import JSONResponse, RedirectResponse
 import os
 
 from config.settings import CRON_SECRET
@@ -13,9 +13,11 @@ from web.auth import (
 )
 from database.auth_queries import get_patient_by_user_id
 from database.queries import (
+    create_patient, get_or_create_doctor,
     get_active_medications, get_recent_lab_reports, get_active_alerts,
     get_recent_care_events, get_upcoming_appointments, acknowledge_alert,
-    get_alert_by_id
+    get_alert_by_id, insert_medication, insert_lab_report,
+    insert_care_event, insert_appointment,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,8 +37,6 @@ async def _get_ptb_app():
     async with _ptb_lock:
         if _ptb_app is None:
             from bot.main import create_app
-            # Do NOT call initialize() — it opens a network connection
-            # only needed for polling mode, not webhook
             _ptb_app = create_app()
     return _ptb_app
 
@@ -65,8 +65,6 @@ def get_patient_data(user: dict) -> dict | None:
                 events=events, appts=appts, status=status)
 
 def _check_cron_auth(request: Request) -> bool:
-    """Vercel sends Authorization: Bearer <CRON_SECRET> for cron jobs.
-    Fails CLOSED if CRON_SECRET is not configured."""
     if not CRON_SECRET:
         logger.error("CRON_SECRET is not set — rejecting cron request")
         return False
@@ -124,7 +122,51 @@ async def logout(request: Request):
     clear_session_cookie(response)
     return response
 
-# ---- Protected routes ----
+# ---- Patient setup ----
+
+@app.get("/patient/add")
+async def add_patient_page(request: Request, user: dict = Depends(require_user)):
+    if get_patient_by_user_id(user["id"]):
+        return RedirectResponse("/dashboard")
+    return templates.TemplateResponse("add_patient.html", {"request": request, "error": None})
+
+@app.post("/patient/add")
+async def add_patient_submit(
+    request: Request, user: dict = Depends(require_user),
+    full_name: str = Form(...),
+    date_of_birth: str = Form(""),
+    gender: str = Form(""),
+    blood_group: str = Form(""),
+    phone: str = Form(""),
+    emergency_contact_name: str = Form(""),
+    emergency_contact_phone: str = Form(""),
+    address_city: str = Form(""),
+    address_state: str = Form(""),
+    known_conditions: str = Form(""),
+):
+    try:
+        conditions = [c.strip() for c in known_conditions.split(",") if c.strip()] if known_conditions else []
+        data = {
+            "full_name": full_name,
+            "date_of_birth": date_of_birth or None,
+            "gender": gender or None,
+            "blood_group": blood_group or None,
+            "phone": phone or None,
+            "emergency_contact_name": emergency_contact_name or None,
+            "emergency_contact_phone": emergency_contact_phone or None,
+            "address_city": address_city or None,
+            "address_state": address_state or None,
+            "known_conditions": conditions,
+        }
+        create_patient(user["id"], data)
+        return RedirectResponse("/dashboard", status_code=303)
+    except Exception as e:
+        logger.exception("Failed to create patient")
+        return templates.TemplateResponse("add_patient.html", {
+            "request": request, "error": str(e)
+        })
+
+# ---- Dashboard ----
 
 @app.get("/dashboard")
 async def dashboard(request: Request, user: dict = Depends(require_user)):
@@ -133,12 +175,57 @@ async def dashboard(request: Request, user: dict = Depends(require_user)):
         return templates.TemplateResponse("no_patient.html", {"request": request, "user": user})
     return templates.TemplateResponse("dashboard.html", {"request": request, **data})
 
+# ---- Medications ----
+
 @app.get("/medications")
 async def medications(request: Request, user: dict = Depends(require_user)):
     data = get_patient_data(user)
     if not data:
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("medications.html", {"request": request, **data})
+
+@app.get("/medications/add")
+async def add_medication_page(request: Request, user: dict = Depends(require_user)):
+    if not get_patient_by_user_id(user["id"]):
+        return RedirectResponse("/dashboard")
+    return templates.TemplateResponse("add_medication.html", {"request": request, "error": None})
+
+@app.post("/medications/add")
+async def add_medication_submit(
+    request: Request, user: dict = Depends(require_user),
+    drug_name: str = Form(...),
+    dosage: str = Form(...),
+    frequency: str = Form(...),
+    timing: str = Form(""),
+    route: str = Form("oral"),
+    purpose: str = Form(""),
+    prescribed_date: str = Form(""),
+    doctor_name: str = Form(""),
+):
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return RedirectResponse("/dashboard")
+    try:
+        doctor = get_or_create_doctor(doctor_name) if doctor_name else None
+        doctor_id = doctor["id"] if doctor else None
+        insert_medication(patient["id"], doctor_id, {
+            "drug_name": drug_name,
+            "dosage": dosage,
+            "frequency": frequency,
+            "timing": timing or None,
+            "route": route,
+            "purpose": purpose or None,
+            "prescribed_date": prescribed_date or None,
+            "status": "active",
+        })
+        return RedirectResponse("/medications", status_code=303)
+    except Exception as e:
+        logger.exception("Failed to add medication")
+        return templates.TemplateResponse("add_medication.html", {
+            "request": request, "error": str(e)
+        })
+
+# ---- Labs ----
 
 @app.get("/labs")
 async def labs_page(request: Request, user: dict = Depends(require_user)):
@@ -147,12 +234,127 @@ async def labs_page(request: Request, user: dict = Depends(require_user)):
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("labs.html", {"request": request, **data})
 
+@app.get("/labs/add")
+async def add_lab_page(request: Request, user: dict = Depends(require_user)):
+    if not get_patient_by_user_id(user["id"]):
+        return RedirectResponse("/dashboard")
+    return templates.TemplateResponse("add_lab.html", {"request": request, "error": None})
+
+@app.post("/labs/add")
+async def add_lab_submit(
+    request: Request, user: dict = Depends(require_user),
+    test_name: str = Form(...),
+    test_value: str = Form(...),
+    unit: str = Form(""),
+    reference_range: str = Form(""),
+    test_date: str = Form(...),
+    lab_name: str = Form(""),
+    is_abnormal: str = Form(""),
+):
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return RedirectResponse("/dashboard")
+    try:
+        insert_lab_report(patient["id"], {
+            "test_name": test_name,
+            "test_value": test_value,
+            "unit": unit or None,
+            "reference_range": reference_range or None,
+            "test_date": test_date,
+            "lab_name": lab_name or None,
+            "is_abnormal": bool(is_abnormal),
+        })
+        return RedirectResponse("/labs", status_code=303)
+    except Exception as e:
+        logger.exception("Failed to add lab report")
+        return templates.TemplateResponse("add_lab.html", {
+            "request": request, "error": str(e)
+        })
+
+# ---- Timeline / Care Events ----
+
 @app.get("/timeline")
 async def timeline(request: Request, user: dict = Depends(require_user)):
     data = get_patient_data(user)
     if not data:
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("timeline.html", {"request": request, **data})
+
+@app.get("/events/add")
+async def add_event_page(request: Request, user: dict = Depends(require_user)):
+    if not get_patient_by_user_id(user["id"]):
+        return RedirectResponse("/dashboard")
+    return templates.TemplateResponse("add_event.html", {"request": request, "error": None})
+
+@app.post("/events/add")
+async def add_event_submit(
+    request: Request, user: dict = Depends(require_user),
+    event_type: str = Form(...),
+    event_description: str = Form(...),
+    severity: str = Form("normal"),
+    reported_by: str = Form(""),
+):
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return RedirectResponse("/dashboard")
+    try:
+        insert_care_event(patient["id"], {
+            "event_type": event_type,
+            "event_description": event_description,
+            "severity": severity,
+            "reported_by": reported_by or "web",
+            "source_type": "web",
+        })
+        return RedirectResponse("/timeline", status_code=303)
+    except Exception as e:
+        logger.exception("Failed to add care event")
+        return templates.TemplateResponse("add_event.html", {
+            "request": request, "error": str(e)
+        })
+
+# ---- Appointments ----
+
+@app.get("/appointments/add")
+async def add_appointment_page(request: Request, user: dict = Depends(require_user)):
+    if not get_patient_by_user_id(user["id"]):
+        return RedirectResponse("/dashboard")
+    return templates.TemplateResponse("add_appointment.html", {"request": request, "error": None})
+
+@app.post("/appointments/add")
+async def add_appointment_submit(
+    request: Request, user: dict = Depends(require_user),
+    appointment_date: str = Form(...),
+    appointment_type: str = Form("Follow-up"),
+    doctor_name: str = Form(""),
+    hospital: str = Form(""),
+    prerequisites: str = Form(""),
+    notes: str = Form(""),
+):
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return RedirectResponse("/dashboard")
+    try:
+        doctor = get_or_create_doctor(doctor_name, hospital=hospital or None) if doctor_name else None
+        doctor_id = doctor["id"] if doctor else None
+        prereqs = [p.strip() for p in prerequisites.split(",") if p.strip()] if prerequisites else []
+        insert_appointment(patient["id"], {
+            "doctor_id": doctor_id,
+            "appointment_date": appointment_date,
+            "appointment_type": appointment_type,
+            "hospital": hospital or None,
+            "prerequisites": prereqs,
+            "prerequisite_status": "pending" if prereqs else "none",
+            "notes": notes or None,
+            "status": "scheduled",
+        })
+        return RedirectResponse("/dashboard", status_code=303)
+    except Exception as e:
+        logger.exception("Failed to add appointment")
+        return templates.TemplateResponse("add_appointment.html", {
+            "request": request, "error": str(e)
+        })
+
+# ---- Alerts ----
 
 @app.get("/alerts")
 async def alerts_page(request: Request, user: dict = Depends(require_user)):
@@ -163,7 +365,6 @@ async def alerts_page(request: Request, user: dict = Depends(require_user)):
 
 @app.post("/alerts/{alert_id}/acknowledge")
 async def ack_alert(alert_id: str, user: dict = Depends(require_user)):
-    # Verify the alert belongs to this user's patient before acknowledging (IDOR prevention)
     patient = get_patient_by_user_id(user["id"])
     if not patient:
         return JSONResponse({"error": "Not found"}, status_code=404)

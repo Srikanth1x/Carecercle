@@ -9,6 +9,7 @@ from bot.handlers.check import check
 from bot.handlers.sos import sos
 from bot.handlers.briefing import briefing
 from bot.handlers.connect import get_connect_conversation, disconnect
+from bot.handlers.add_appointment import get_add_appointment_conversation
 from bot.handlers.photo_handler import handle_photo
 from bot.handlers.document_handler import handle_document
 from bot.handlers.voice_handler import handle_voice
@@ -17,8 +18,9 @@ from bot.handlers.text_handler import handle_text
 def create_app() -> Application:
     app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
-    # Connect/disconnect must be registered before generic text handler
+    # Conversation handlers must be registered before generic text handler
     app.add_handler(get_connect_conversation())
+    app.add_handler(get_add_appointment_conversation())
     app.add_handler(CommandHandler("disconnect", disconnect))
 
     app.add_handler(CommandHandler("start", start))

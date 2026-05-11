@@ -2,7 +2,13 @@
 {% block title %}Medications{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-4">💊 Active Medications</h1>
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold">💊 Active Medications</h1>
+  <a href="/medications/add"
+     class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition">
+    + Add Medication
+  </a>
+</div>
 
 <div class="bg-white rounded-xl shadow overflow-x-auto">
   <table class="w-full text-sm">
@@ -29,7 +35,7 @@
         <td class="p-3 text-gray-400">{{ m.prescribed_date or "—" }}</td>
       </tr>
       {% else %}
-      <tr><td colspan="7" class="p-4 text-gray-400 text-center">No active medications.</td></tr>
+      <tr><td colspan="7" class="p-4 text-gray-400 text-center">No active medications. <a href="/medications/add" class="text-blue-600 underline">Add one</a>.</td></tr>
       {% endfor %}
     </tbody>
   </table>
