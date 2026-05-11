@@ -69,14 +69,22 @@
   <!-- Hero -->
   <section class="hero-grid relative">
     <div class="max-w-4xl mx-auto px-6 py-24 text-center">
-      <div class="inline-block bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-medium px-3 py-1 rounded-full mb-6 tracking-wide uppercase">
-        ABDM-Compatible
+      <div class="flex items-center justify-center gap-2 flex-wrap mb-6">
+        <div class="inline-block bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-medium px-3 py-1 rounded-full tracking-wide uppercase">
+          Built on UHI / ABDM Rails
+        </div>
+        <div class="inline-block bg-zinc-800 border border-zinc-700 text-zinc-400 text-xs font-medium px-3 py-1 rounded-full tracking-wide uppercase">
+          ABHA-Ready
+        </div>
+        <div class="inline-block bg-zinc-800 border border-zinc-700 text-zinc-400 text-xs font-medium px-3 py-1 rounded-full tracking-wide uppercase">
+          FHIR R4
+        </div>
       </div>
       <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight mb-5">
         Complete health visibility<br class="hidden md:block"> for families caring from a distance.
       </h1>
       <p class="text-lg text-zinc-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-        CareCircle structures prescriptions, lab reports, and caregiver updates into a single picture — built on Ayushman Bharat Digital Mission data standards, so every record is ready for India's national health infrastructure.
+        CareCircle structures prescriptions, lab reports, and caregiver updates into a single picture. Built on India's national health infrastructure -- ABDM, UHI, and ABHA -- so records from any linked hospital or clinic are accessible in one place.
       </p>
       <div class="flex gap-4 justify-center flex-wrap">
         <a href="/register" class="bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium px-6 py-3 rounded-lg transition-colors">
@@ -109,6 +117,70 @@
         <div class="bg-zinc-900 border-l-2 border-teal-500 rounded-r-lg p-5">
           <h3 class="font-semibold text-white mb-2">No doctor sees the full list</h3>
           <p class="text-sm text-zinc-400 leading-relaxed">The cardiologist does not know what the endocrinologist prescribed. Drug interactions get missed — until they cause harm.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- India's Open Health Stack -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">Infrastructure</p>
+      <h2 class="text-2xl font-bold text-white text-center mb-4">India's open health infrastructure</h2>
+      <p class="text-sm text-zinc-400 text-center mb-12 max-w-xl mx-auto">
+        UHI is India's open protocol for health services -- the same idea as UPI, applied to healthcare. CareCircle is built directly on this stack, which means your parent's records from any ABDM-linked hospital or lab can flow into one place with their consent.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-6 mb-10">
+        <!-- ABHA -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-bold px-2 py-0.5 rounded">ABHA</span>
+            <span class="text-xs text-zinc-500">Health ID</span>
+          </div>
+          <h3 class="font-semibold text-white text-sm mb-2">One ID for every Indian</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Ayushman Bharat Health Account -- a 14-digit identifier that links a person's health records across all hospitals, labs, and pharmacies. 847 million IDs created. Your parent's Apollo visit, the local clinic prescription, and the diagnostic report are all accessible through one number.
+          </p>
+        </div>
+
+        <!-- UHI -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-bold px-2 py-0.5 rounded">UHI</span>
+            <span class="text-xs text-zinc-500">Unified Health Interface</span>
+          </div>
+          <h3 class="font-semibold text-white text-sm mb-2">Open protocol, not a closed app</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            UHI is the open network layer that lets any compliant app discover doctors, book consultations, and access health records -- without being locked into one hospital's portal. Governed by the National Health Authority. Think of it as the routing layer beneath every health interaction.
+          </p>
+        </div>
+
+        <!-- HIE-CM -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-bold px-2 py-0.5 rounded">HIE-CM</span>
+            <span class="text-xs text-zinc-500">Consent Manager</span>
+          </div>
+          <h3 class="font-semibold text-white text-sm mb-2">Patient controls every access</h3>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Before any record moves, the patient approves the request -- what data, from which provider, to whom. The Health Information Exchange and Consent Manager is the layer that enforces this. CareCircle uses it to ensure family members see only what the patient has explicitly permitted.
+          </p>
+        </div>
+      </div>
+
+      <!-- ABDM ecosystem strip -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+        <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4 text-center">ABDM ecosystem CareCircle connects to</div>
+        <div class="flex flex-wrap justify-center gap-3">
+          <div class="bg-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300">National Health Authority (NHA)</div>
+          <div class="bg-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300">ABHA Health ID</div>
+          <div class="bg-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300">UHI Gateway</div>
+          <div class="bg-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300">HIE-CM Consent Layer</div>
+          <div class="bg-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300">FHIR R4 Records</div>
+          <div class="bg-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300">PMJAY / Ayushman Bharat</div>
+          <div class="bg-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300">Healthcare Professionals Registry (HPR)</div>
+          <div class="bg-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300">Health Facility Registry (HFR)</div>
         </div>
       </div>
     </div>
@@ -161,25 +233,93 @@
     </div>
   </section>
 
+  <!-- Differentiation -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">Position</p>
+      <h2 class="text-2xl font-bold text-white text-center mb-4">What most health apps miss</h2>
+      <p class="text-sm text-zinc-400 text-center mb-12 max-w-xl mx-auto">
+        ABDM-linked apps in India are strong on infrastructure. Most stop at storing records. CareCircle is built for the person who is not the patient -- the adult child managing a parent's care from another city.
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">Most ABDM apps</div>
+          <ul class="space-y-2.5 text-sm text-zinc-400">
+            <li class="flex gap-2.5 items-start">
+              <span class="text-zinc-600 mt-0.5 flex-shrink-0">--</span>
+              Show raw PDFs and FHIR bundles
+            </li>
+            <li class="flex gap-2.5 items-start">
+              <span class="text-zinc-600 mt-0.5 flex-shrink-0">--</span>
+              Require a new app download and ABHA ID upfront
+            </li>
+            <li class="flex gap-2.5 items-start">
+              <span class="text-zinc-600 mt-0.5 flex-shrink-0">--</span>
+              Designed for patients or doctors -- not caregivers
+            </li>
+            <li class="flex gap-2.5 items-start">
+              <span class="text-zinc-600 mt-0.5 flex-shrink-0">--</span>
+              No synthesis across multiple specialists
+            </li>
+            <li class="flex gap-2.5 items-start">
+              <span class="text-zinc-600 mt-0.5 flex-shrink-0">--</span>
+              No handling for handwritten prescriptions or blurry photos
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-zinc-900 border border-teal-500/30 rounded-xl p-6">
+          <div class="text-xs font-medium text-teal-500 uppercase tracking-wider mb-4">CareCircle</div>
+          <ul class="space-y-2.5 text-sm text-zinc-300">
+            <li class="flex gap-2.5 items-start">
+              <span class="text-teal-500 mt-0.5 flex-shrink-0">+</span>
+              AI briefings synthesize records from all doctors into plain language
+            </li>
+            <li class="flex gap-2.5 items-start">
+              <span class="text-teal-500 mt-0.5 flex-shrink-0">+</span>
+              Start with a WhatsApp photo -- link ABHA ID later
+            </li>
+            <li class="flex gap-2.5 items-start">
+              <span class="text-teal-500 mt-0.5 flex-shrink-0">+</span>
+              Telegram-native alerts -- no new app required
+            </li>
+            <li class="flex gap-2.5 items-start">
+              <span class="text-teal-500 mt-0.5 flex-shrink-0">+</span>
+              Drug interactions caught across all active medications
+            </li>
+            <li class="flex gap-2.5 items-start">
+              <span class="text-teal-500 mt-0.5 flex-shrink-0">+</span>
+              OCR on handwritten prescriptions, blurry photos, Hindi text
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Blockchain / Consent -->
   <section class="border-t border-zinc-800 py-20">
     <div class="max-w-4xl mx-auto px-6">
       <div class="md:flex gap-12 items-start">
         <div class="flex-1 mb-8 md:mb-0">
-          <span class="inline-block text-xs font-medium text-zinc-500 uppercase tracking-widest border border-zinc-700 px-2 py-0.5 rounded mb-4">V2 Roadmap</span>
-          <h2 class="text-2xl font-bold text-white mb-4">Immutable consent and audit chain</h2>
+          <div class="flex items-center gap-2 mb-4">
+            <span class="inline-block text-xs font-medium text-zinc-400 uppercase tracking-widest border border-zinc-700 px-2 py-0.5 rounded">Today</span>
+            <span class="inline-block text-xs font-medium text-zinc-500 uppercase tracking-widest border border-zinc-800 px-2 py-0.5 rounded">V2 Roadmap: blockchain anchoring</span>
+          </div>
+          <h2 class="text-2xl font-bold text-white mb-4">ABHA-linked consent and audit trail</h2>
           <p class="text-zinc-400 text-sm leading-relaxed mb-4">
-            The ABDM data model is designed for blockchain-anchored consent. Every data access is logged to a consent table today. In V2, consent artifacts will be anchored to a distributed ledger, making it cryptographically impossible to retroactively modify who accessed which record or when.
+            Every data access in CareCircle is logged to a consent table, tied to the patient's ABHA ID. The HIE-CM layer ensures no family member or doctor can pull records without an explicit approval event on record. Today this lives in Supabase with full timestamps and role attribution.
           </p>
           <p class="text-zinc-400 text-sm leading-relaxed">
-            Records are versioned and never deleted. When a prescription changes, the old version is marked superseded and the full history is preserved with its ABHA ID linkage intact.
+            Records are versioned and never deleted. When a prescription changes, the old version is marked superseded -- the full history is preserved with its ABHA ID linkage intact. In V2, consent artifacts will be anchored to a distributed ledger for cryptographic tamper-evidence.
           </p>
         </div>
         <div class="flex-shrink-0 md:w-72">
           <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
             <div class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">Data architecture principles</div>
-            <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">Consent-gated access</div>
-            <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">FHIR-compatible record types</div>
+            <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">Consent-gated access (HIE-CM)</div>
+            <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">FHIR R4 record types</div>
             <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">Versioned, never deleted</div>
             <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">ABHA ID as universal key</div>
             <div class="bg-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-300">Full audit trail per record</div>
@@ -305,10 +445,14 @@
           </div>
 
           <!-- Row 5: ABDM Layer -->
-          <div class="flex justify-center">
-            <div class="arch-box border-teal-400/80 text-teal-300 font-medium px-6">
-              ABDM Layer: ABHA ID + FHIR Record Types + Consent Log
-            </div>
+          <div class="flex justify-center gap-3 flex-wrap">
+            <div class="arch-box border-teal-400/80 text-teal-300 font-medium">ABHA ID</div>
+            <div class="arch-box border-teal-400/80 text-teal-300 font-medium">UHI Gateway</div>
+            <div class="arch-box border-teal-400/80 text-teal-300 font-medium">HIE-CM Consent</div>
+            <div class="arch-box border-teal-400/80 text-teal-300 font-medium">FHIR R4</div>
+          </div>
+          <div class="flex justify-center mt-2">
+            <div class="text-xs text-zinc-500 text-center">ABDM / Ayushman Bharat Digital Mission (NHA)</div>
           </div>
 
         </div>
@@ -356,7 +500,7 @@
         </div>
       </div>
       <div class="border-t border-zinc-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-        <p class="text-xs text-zinc-600">Built on ABDM standards. Not a medical device.</p>
+        <p class="text-xs text-zinc-600">Built on UHI / ABDM / ABHA infrastructure. Not a medical device.</p>
         <p class="text-xs text-zinc-600">CareCircle 2026</p>
       </div>
     </div>
