@@ -79,7 +79,12 @@ async def login_page(request: Request):
 
 @app.post("/login")
 async def login_submit(request: Request, email: str = Form(...), password: str = Form(...)):
-    result = await supabase_login(email, password)
+    try:
+        result = await supabase_login(email, password)
+    except ValueError as e:
+        return templates.TemplateResponse("login.html", {
+            "request": request, "error": str(e), "registered": None
+        })
     if not result:
         return templates.TemplateResponse("login.html", {
             "request": request, "error": "Invalid email or password.", "registered": None

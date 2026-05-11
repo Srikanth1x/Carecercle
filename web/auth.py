@@ -15,7 +15,16 @@ async def supabase_login(email: str, password: str) -> dict | None:
             json={"email": email, "password": password},
             headers=_headers()
         )
-    return r.json() if r.status_code == 200 else None
+    if r.status_code == 200:
+        return r.json()
+    # Surface the real error message for debugging
+    try:
+        body = r.json()
+        raise ValueError(body.get("error_description") or body.get("msg") or body.get("message") or "Invalid email or password.")
+    except ValueError:
+        raise
+    except Exception:
+        return None
 
 async def supabase_register(email: str, password: str) -> dict | None:
     async with httpx.AsyncClient() as client:
