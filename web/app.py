@@ -38,6 +38,7 @@ async def _get_ptb_app():
         if _ptb_app is None:
             from bot.main import create_app
             _ptb_app = create_app()
+            await _ptb_app.initialize()
     return _ptb_app
 
 # ---- Exception handler ----
