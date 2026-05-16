@@ -34,3 +34,7 @@ input::placeholder, textarea::placeholder {
   font-size: 1.25rem;
   justify-content: center;
 }
+
+/* Telegram chat bubbles — bot demo section */
+.tg-bubble-bot  { background:#27272a; border:1px solid #3f3f46; border-radius:0 12px 12px 12px; }
+.tg-bubble-user { background:#0d5c4f; border-radius:12px 0 12px 12px; }

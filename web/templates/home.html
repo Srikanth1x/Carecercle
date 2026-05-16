@@ -120,10 +120,48 @@
 
   <!-- Hero -->
   <section class="hero-grid relative">
-    <div class="max-w-4xl mx-auto px-6 py-24 text-center">
-      <div class="flex items-center justify-center gap-2 flex-wrap mb-6">
+    <div class="max-w-3xl mx-auto px-6 py-24 text-center">
+
+      <!-- Crisis timestamp -->
+      <p class="font-mono text-xs text-zinc-500 mb-7 tracking-widest">
+        3:17 AM &mdash; Missed call from +91 40 XXXXXXXX
+      </p>
+
+      <!-- Emotional headline -->
+      <h1 class="text-4xl md:text-5xl font-bold leading-tight tracking-tight mb-6">
+        <span class="text-white">Your dad is in hospital.</span><br>
+        <span class="text-white">You're 600 kilometres away.</span><br>
+        <span class="text-zinc-400">You don't know what he was on.</span>
+      </h1>
+
+      <!-- What CareCircle does -->
+      <p class="text-base md:text-lg text-zinc-400 max-w-2xl mx-auto mb-4 leading-relaxed">
+        CareCircle gives you a complete, living picture of your parent's health --
+        prescriptions, lab trends, and doctor updates -- synthesized by AI into a
+        plain-English morning briefing, every day at 7 AM on Telegram.
+      </p>
+
+      <!-- Friction removers -->
+      <p class="text-sm text-zinc-500 mb-8">
+        No app download. No IT skills needed. Forward a prescription photo and you're set.
+      </p>
+
+      <!-- CTAs -->
+      <div class="flex gap-4 justify-center flex-wrap mb-10">
+        <a href="/register"
+           class="bg-teal-500 hover:bg-teal-400 text-zinc-950 font-semibold px-6 py-3 rounded-lg transition-colors">
+          Join Beta -- Free
+        </a>
+        <a href="#bot-demo"
+           class="border border-zinc-700 hover:border-teal-500/50 text-zinc-300 hover:text-teal-400 px-6 py-3 rounded-lg transition-colors">
+          See the daily briefing
+        </a>
+      </div>
+
+      <!-- ABDM/UHI/FHIR badges — demoted below CTAs -->
+      <div class="flex items-center justify-center gap-2 flex-wrap">
         <div class="inline-block bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-medium px-3 py-1 rounded-full tracking-wide uppercase">
-          Built on UHI / ABDM Rails
+          Built on ABDM / UHI
         </div>
         <div class="inline-block bg-zinc-800 border border-zinc-700 text-zinc-400 text-xs font-medium px-3 py-1 rounded-full tracking-wide uppercase">
           ABHA-Ready
@@ -132,21 +170,97 @@
           FHIR R4
         </div>
       </div>
-      <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight mb-5">
-        Complete health visibility<br class="hidden md:block"> for families caring from a distance.
-      </h1>
-      <p class="text-lg text-zinc-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-        CareCircle structures prescriptions, lab reports, and caregiver updates into a single picture. Built on India's national health infrastructure -- ABDM, UHI, and ABHA -- so records from any linked hospital or clinic are accessible in one place.
+
+    </div>
+  </section>
+
+  <!-- Telegram Bot Demo -->
+  <section id="bot-demo" class="border-t border-zinc-800 py-20">
+    <div class="max-w-2xl mx-auto px-6">
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">
+        What you get every morning
       </p>
-      <div class="flex gap-4 justify-center flex-wrap">
-        <a href="/register" class="bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium px-6 py-3 rounded-lg transition-colors">
-          Open Dashboard
-        </a>
-        <a href="https://github.com/Srikanth1x/Carecercle" target="_blank" rel="noopener"
-           class="border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-white px-6 py-3 rounded-lg transition-colors">
-          View on GitHub
-        </a>
+      <h2 class="text-2xl font-bold text-white text-center mb-10">
+        Your 7 AM briefing, on Telegram
+      </h2>
+
+      <!-- Chat frame -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+
+        <!-- Chat header -->
+        <div class="bg-zinc-800 border-b border-zinc-700 px-5 py-3 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-teal-500/20 border border-teal-500/40 flex items-center justify-center flex-shrink-0">
+            <span class="text-teal-400 text-xs font-bold">CC</span>
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-white">CareCircle Bot</div>
+            <div class="text-xs text-zinc-500">bot</div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="p-5 space-y-5">
+
+          <!-- Bot message -->
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full bg-teal-500/20 border border-teal-500/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="text-teal-400 text-xs font-bold">CC</span>
+            </div>
+            <div class="flex-1">
+              <div class="tg-bubble-bot p-4 space-y-3 max-w-[90%]">
+                <p class="text-sm font-semibold text-white">Dad's Morning Briefing -- 16 May</p>
+                <p class="text-sm text-zinc-300 leading-relaxed">
+                  Stable. Blood pressure 128/82 yesterday (good range).
+                </p>
+                <p class="text-sm text-zinc-300 leading-relaxed">
+                  Metformin due in 2 hours. He may have skipped yesterday's PM dose --
+                  no log entry detected.
+                </p>
+                <p class="text-sm leading-relaxed">
+                  <span class="text-amber-400 font-medium">Flagged:</span>
+                  <span class="text-zinc-300"> New prescription: Telmisartan (Dr. Rao, 12 May).
+                  Possible interaction with Amlodipine. Share with Dr. Kumar before next visit.</span>
+                </p>
+                <p class="text-sm leading-relaxed">
+                  <span class="text-zinc-500 font-medium">Next:</span>
+                  <span class="text-zinc-300"> HbA1c test overdue by 11 days. Book at SRL Labs --
+                  records auto-link to ABHA.</span>
+                </p>
+              </div>
+              <p class="text-xs text-zinc-600 mt-1 ml-1">07:00 AM</p>
+            </div>
+          </div>
+
+          <!-- User reply -->
+          <div class="flex justify-end">
+            <div>
+              <div class="tg-bubble-user px-4 py-3 ml-auto" style="max-width:75%;">
+                <p class="text-sm text-zinc-100 leading-relaxed">Got it. Calling him now. Book the test?</p>
+              </div>
+              <p class="text-xs text-zinc-600 mt-1 text-right mr-1">07:03 AM</p>
+            </div>
+          </div>
+
+          <!-- Bot reply -->
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full bg-teal-500/20 border border-teal-500/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="text-teal-400 text-xs font-bold">CC</span>
+            </div>
+            <div class="flex-1">
+              <div class="tg-bubble-bot p-4 max-w-[90%]">
+                <p class="text-sm text-zinc-300 leading-relaxed">
+                  Booking SRL for tomorrow 8 AM. Report will auto-link to Dad's ABHA.
+                  I'll alert you when it arrives.
+                </p>
+              </div>
+              <p class="text-xs text-zinc-600 mt-1 ml-1">07:03 AM</p>
+            </div>
+          </div>
+
+        </div>
       </div>
+      <!-- End chat frame -->
+
     </div>
   </section>
 
@@ -160,7 +274,7 @@
       <div class="grid md:grid-cols-3 gap-6">
         <div class="bg-zinc-900 border-l-2 border-teal-500 rounded-r-lg p-5">
           <h3 class="font-semibold text-white mb-2">Prescriptions arrive as photos</h3>
-          <p class="text-sm text-zinc-400 leading-relaxed">Handwritten prescriptions forwarded on WhatsApp. No version history. No way to know if a dosage changed.</p>
+          <p class="text-sm text-zinc-400 leading-relaxed">Handwritten prescriptions forwarded on Telegram. No version history. No way to know if a dosage changed.</p>
         </div>
         <div class="bg-zinc-900 border-l-2 border-teal-500 rounded-r-lg p-5">
           <h3 class="font-semibold text-white mb-2">Lab reports live in three apps</h3>
@@ -283,7 +397,7 @@
             </li>
             <li class="flex gap-2.5 items-start">
               <span class="text-teal-500 mt-0.5 flex-shrink-0">+</span>
-              Start with a WhatsApp photo -- link ABHA ID later
+              Start with a Telegram photo -- link ABHA ID later
             </li>
             <li class="flex gap-2.5 items-start">
               <span class="text-teal-500 mt-0.5 flex-shrink-0">+</span>
@@ -386,7 +500,7 @@
             <div class="flex justify-center gap-2 flex-wrap">
               <div class="arch-node-input">
                 <div class="arch-node-title">Prescriptions</div>
-                <div class="arch-node-sub">WhatsApp photos</div>
+                <div class="arch-node-sub">Telegram photos</div>
               </div>
               <div class="arch-node-input">
                 <div class="arch-node-title">Lab Reports</div>
@@ -513,6 +627,235 @@
           <div class="w-3 h-3 rounded border border-emerald-500/50 bg-emerald-500/10"></div>
           Trust = audit + consent
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust / Data Safety -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+
+      <!-- Government trust badge strip -->
+      <div class="flex items-center justify-center gap-4 flex-wrap mb-10">
+        <div class="flex items-center gap-3 bg-zinc-900 border border-zinc-700 rounded-xl px-5 py-3">
+          <!-- NHA inline SVG badge -->
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="National Health Authority">
+            <circle cx="16" cy="16" r="15" stroke="#2dd4bf" stroke-width="1.5" fill="none" opacity="0.5"/>
+            <rect x="14.5" y="6" width="3" height="20" rx="1.5" fill="#2dd4bf"/>
+            <rect x="6" y="14.5" width="20" height="3" rx="1.5" fill="#2dd4bf"/>
+          </svg>
+          <div>
+            <div class="text-xs font-semibold text-zinc-200 leading-tight">National Health Authority</div>
+            <div class="text-xs text-zinc-500 leading-tight">Government of India</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 bg-zinc-900 border border-zinc-700 rounded-xl px-5 py-3">
+          <!-- ABDM inline SVG badge -->
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Ayushman Bharat Digital Mission">
+            <circle cx="16" cy="16" r="15" stroke="#2dd4bf" stroke-width="1.5" fill="none" opacity="0.5"/>
+            <circle cx="16" cy="16" r="4" fill="#2dd4bf" opacity="0.9"/>
+            <line x1="16" y1="2" x2="16" y2="8" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+            <line x1="16" y1="24" x2="16" y2="30" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+            <line x1="2" y1="16" x2="8" y2="16" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+            <line x1="24" y1="16" x2="30" y2="16" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+            <line x1="5.5" y1="5.5" x2="9.8" y2="9.8" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+            <line x1="22.2" y1="22.2" x2="26.5" y2="26.5" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+            <line x1="26.5" y1="5.5" x2="22.2" y2="9.8" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+            <line x1="9.8" y1="22.2" x2="5.5" y2="26.5" stroke="#2dd4bf" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+          </svg>
+          <div>
+            <div class="text-xs font-semibold text-teal-400 leading-tight">Ayushman Bharat Digital Mission</div>
+            <div class="text-xs text-zinc-500 leading-tight">ABDM / NHA</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-zinc-500 text-center mb-12">
+        Your personal health data is never shared without your explicit permission.
+      </p>
+
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">Security and Privacy</p>
+      <h2 class="text-2xl font-bold text-white text-center mb-12">
+        We take health data as seriously as medicine.
+      </h2>
+
+      <div class="grid md:grid-cols-2 gap-5">
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-4">
+            <span class="text-teal-400 text-sm font-bold">01</span>
+          </div>
+          <h3 class="font-semibold text-white mb-2">You control every access</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">
+            Every record transfer requires your explicit consent via ABDM's HIE-CM Consent Manager.
+            No data moves without you approving it -- not to doctors, not to insurance companies, not to us.
+          </p>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-4">
+            <span class="text-teal-400 text-sm font-bold">02</span>
+          </div>
+          <h3 class="font-semibold text-white mb-2">Built on government infrastructure</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">
+            CareCircle uses India's National Health Authority (NHA) gateway. Your records link to
+            ABHA -- the same system used by AIIMS and 438,000+ hospitals across the country.
+          </p>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-4">
+            <span class="text-teal-400 text-sm font-bold">03</span>
+          </div>
+          <h3 class="font-semibold text-white mb-2">DPDP Act 2023 compliant</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">
+            Health data is Sensitive Personal Data under India's Digital Personal Data Protection
+            Act 2023. We process it with explicit purpose consent, retain only what's needed,
+            and provide full deletion on request.
+          </p>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <div class="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-4">
+            <span class="text-teal-400 text-sm font-bold">04</span>
+          </div>
+          <h3 class="font-semibold text-white mb-2">Your records are never deleted</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed">
+            When a prescription changes, the old version is marked superseded -- not erased.
+            Every version is preserved with a timestamp and its full ABHA ID linkage intact.
+          </p>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:col-span-2">
+          <div class="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-4">
+            <span class="text-teal-400 text-sm font-bold">05</span>
+          </div>
+          <h3 class="font-semibold text-white mb-2">Encrypted, role-gated, audit-logged</h3>
+          <p class="text-sm text-zinc-400 leading-relaxed max-w-2xl">
+            Data is encrypted at rest and in transit (AES-256, TLS 1.3). Only family members
+            you explicitly add can view records. Every access is logged with a timestamp and actor ID.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">Real stories</p>
+      <h2 class="text-2xl font-bold text-white text-center mb-12">What caregivers say</h2>
+
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <div class="bg-zinc-900 border-l-2 border-teal-500 rounded-r-lg p-6">
+          <p class="text-sm text-zinc-300 leading-relaxed mb-5">
+            "The drug interaction alert caught something my father's own doctors had missed.
+            His cardiologist and neurologist didn't know what the other had prescribed.
+            CareCircle flagged it the morning after I forwarded the second prescription."
+          </p>
+          <p class="text-xs text-zinc-500 leading-relaxed">
+            Software engineer in Bengaluru<br>managing parents in Nellore
+          </p>
+        </div>
+
+        <div class="bg-zinc-900 border-l-2 border-teal-500 rounded-r-lg p-6">
+          <p class="text-sm text-zinc-300 leading-relaxed mb-5">
+            "I used to call my mother every morning to verify her medicines. Now the 7 AM
+            briefing does it. I call her to talk, not to audit her prescriptions."
+          </p>
+          <p class="text-xs text-zinc-500 leading-relaxed">
+            Marketing manager in Mumbai
+          </p>
+        </div>
+
+        <div class="bg-zinc-900 border-l-2 border-zinc-700 rounded-r-lg p-6 flex flex-col justify-between">
+          <p class="text-sm text-zinc-500 leading-relaxed mb-5 italic">
+            More stories coming as the beta grows.
+            Join today and be part of the first cohort.
+          </p>
+          <a href="/register" class="text-sm text-teal-400 hover:text-teal-300 transition-colors font-medium">
+            Join Beta -- Free
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="border-t border-zinc-800 py-20">
+    <div class="max-w-4xl mx-auto px-6">
+      <p class="text-xs font-medium text-zinc-500 uppercase tracking-widest mb-3 text-center">Pricing</p>
+      <h2 class="text-2xl font-bold text-white text-center mb-3">Simple, transparent pricing</h2>
+      <p class="text-sm text-zinc-400 text-center mb-12">
+        Free during beta. Pricing takes effect at public launch.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-6 items-start">
+
+        <!-- Free Beta -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <p class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Free Beta</p>
+          <p class="text-3xl font-bold text-white mb-1">&#x20B9;0</p>
+          <p class="text-xs text-zinc-500 mb-6">Until public launch -- no credit card</p>
+          <a href="/register"
+             class="block text-center bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-medium px-4 py-2.5 rounded-lg transition-colors mb-6 text-sm">
+            Join Beta -- Free
+          </a>
+          <ul class="space-y-2.5">
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>1 parent profile</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Telegram bot access</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Daily 7 AM briefing</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Drug interaction checks</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Telegram prescription upload</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>ABHA ID linking</li>
+          </ul>
+        </div>
+
+        <!-- Family — highlighted -->
+        <div class="bg-zinc-900 border border-teal-500/50 rounded-xl p-6 relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="bg-teal-500 text-zinc-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide whitespace-nowrap">
+              Most Popular
+            </span>
+          </div>
+          <p class="text-xs font-medium text-teal-400 uppercase tracking-wider mb-2 mt-2">Family</p>
+          <p class="text-3xl font-bold text-white mb-1">&#x20B9;299<span class="text-base font-normal text-zinc-400">/month</span></p>
+          <p class="text-xs text-zinc-500 mb-6">After beta</p>
+          <a href="/register"
+             class="block text-center bg-teal-500 hover:bg-teal-400 text-zinc-950 font-semibold px-4 py-2.5 rounded-lg transition-colors mb-6 text-sm">
+            Join Beta -- Free
+          </a>
+          <ul class="space-y-2.5">
+            <li class="flex items-start gap-2 text-sm text-zinc-300"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Up to 3 parent profiles</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-300"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>All Free features included</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-300"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>3 family members notified</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-300"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Appointment reminders</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-300"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Lab trend graphs</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-300"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Priority support</li>
+          </ul>
+        </div>
+
+        <!-- Care Pro -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+          <p class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Care Pro</p>
+          <p class="text-3xl font-bold text-white mb-1">&#x20B9;999<span class="text-base font-normal text-zinc-400">/month</span></p>
+          <p class="text-xs text-zinc-500 mb-6">For elder care managers</p>
+          <a href="/register"
+             class="block text-center bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-medium px-4 py-2.5 rounded-lg transition-colors mb-6 text-sm">
+            Contact for Beta Access
+          </a>
+          <ul class="space-y-2.5">
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Up to 20 patient profiles</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>All Family features included</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Blockchain audit trail (V2)</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Insurance claim support</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>API access for facilities</li>
+            <li class="flex items-start gap-2 text-sm text-zinc-400"><span class="text-teal-500 flex-shrink-0 mt-0.5">+</span>Dedicated account manager</li>
+          </ul>
+        </div>
+
       </div>
     </div>
   </section>
