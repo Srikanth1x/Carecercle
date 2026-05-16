@@ -23,7 +23,7 @@ async def summary(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         status_icon = "🚨" if alerts else ("⚠️" if abnormal_labs else "✅")
 
         lines = [
-            f"{status_icon} *Dad's Summary — {patient['full_name']}*\n",
+            f"{status_icon} *Summary -- {patient['full_name']}*\n",
             f"💊 Active medications: {len(meds)}",
             f"🔬 Abnormal lab values: {len(abnormal_labs)}",
             f"🔔 Active alerts: {len(alerts)}",
