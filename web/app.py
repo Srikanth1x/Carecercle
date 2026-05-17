@@ -562,22 +562,28 @@ async def cron_silence(request: Request):
 
 @app.get("/cron/test-briefing")
 async def test_briefing(request: Request, user: dict = Depends(require_user)):
-    patient = get_patient_by_user_id(user["id"])
-    if not patient:
-        return JSONResponse({"error": "No patient"}, status_code=404)
-    from database.auth_queries import get_all_linked_users
-    linked = [u for u in get_all_linked_users() if u.get("user_id") == user["id"]]
-    if not linked or not linked[0].get("telegram_chat_id"):
-        return JSONResponse({"error": "No Telegram account linked"}, status_code=400)
-    from ai.briefing_generator import generate_briefing
-    ptb = await _get_ptb_app()
-    text = await generate_briefing(patient)
-    await ptb.bot.send_message(
-        chat_id=linked[0]["telegram_chat_id"],
-        text=text,
-        parse_mode="Markdown"
-    )
-    return JSONResponse({"ok": True, "preview": text[:300]})
+    try:
+        patient = get_patient_by_user_id(user["id"])
+        if not patient:
+            return JSONResponse({"error": "No patient"}, status_code=404)
+        from database.auth_queries import get_all_linked_users
+        linked = [u for u in get_all_linked_users() if u.get("user_id") == user["id"]]
+        if not linked or not linked[0].get("telegram_chat_id"):
+            return JSONResponse({"error": "No Telegram linked"}, status_code=400)
+        from ai.briefing_generator import generate_briefing
+        from telegram import Bot
+        from config.settings import TELEGRAM_BOT_TOKEN
+        text = await generate_briefing(patient)
+        bot = Bot(token=TELEGRAM_BOT_TOKEN)
+        await bot.send_message(
+            chat_id=linked[0]["telegram_chat_id"],
+            text=text,
+            parse_mode="Markdown"
+        )
+        return JSONResponse({"ok": True, "preview": text[:400]})
+    except Exception as e:
+        logger.exception("test-briefing failed")
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 @app.get("/cron/wipe-demo")
