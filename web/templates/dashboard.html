@@ -9,7 +9,10 @@
     <h1 class="text-2xl font-bold text-white">{{ patient.full_name }}</h1>
     <p class="text-sm text-zinc-400 mt-1">
       {% if patient.abha_id %}
-        <span class="inline-flex items-center gap-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-xs mr-2">ABHA {{ patient.abha_id[:2] }}-{{ patient.abha_id[2:6] }}-{{ patient.abha_id[6:10] }}-{{ patient.abha_id[10:] }}</span>
+        <span class="inline-flex items-center gap-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-xs mr-2">
+          <img src="/static/abdm1.png" alt="ABDM" class="h-4 w-auto" />
+          {{ patient.abha_id[:2] }}-{{ patient.abha_id[2:6] }}-{{ patient.abha_id[6:10] }}-{{ patient.abha_id[10:] }}
+        </span>
       {% else %}
         <a href="/setup" class="inline-flex items-center gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-teal-400 px-2 py-0.5 rounded text-xs mr-2 transition-colors">+ Add ABHA</a>
       {% endif %}
