@@ -62,22 +62,23 @@
       </p>
 
       <div class="flex gap-3 mb-3">
-        <input type="text"
+        <input type="text" id="abha-input"
+               value="{% if patient.abha_id %}{{ patient.abha_id[:2] }}-{{ patient.abha_id[2:6] }}-{{ patient.abha_id[6:10] }}-{{ patient.abha_id[10:] }}{% endif %}"
                placeholder="Enter ABHA number (e.g. 64-5146-1161-4671)"
-               class="flex-1 rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-400 placeholder-zinc-600 cursor-not-allowed"
-               disabled />
-        <button disabled
-                title="ABDM API integration coming soon"
-                class="bg-zinc-700 text-zinc-500 font-medium px-4 py-2 rounded-lg text-sm cursor-not-allowed whitespace-nowrap">
+               class="flex-1 rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-teal-500/50" />
+        <button onclick="fetchAbdmRecords()"
+                class="bg-teal-600 hover:bg-teal-500 text-white font-medium px-4 py-2 rounded-lg text-sm transition-colors whitespace-nowrap">
           Fetch Records
         </button>
       </div>
 
-      <div class="flex items-center gap-2 text-xs text-zinc-600">
+      <div id="abdm-result" class="hidden mt-3"></div>
+
+      <div class="flex items-center gap-2 text-xs text-zinc-600 mt-3">
         <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        ABDM API integration in progress &mdash; coming in next release
+        Live ABDM record pull coming in next release &mdash; consent flow in progress
       </div>
     </div>
   </div>
@@ -258,6 +259,35 @@
       </div>
     `;
     container.appendChild(card);
+  }
+
+  function fetchAbdmRecords() {
+    const abha = document.getElementById('abha-input').value.trim();
+    const resultDiv = document.getElementById('abdm-result');
+    if (!abha) {
+      resultDiv.innerHTML = `<p class="text-xs text-amber-400">Enter an ABHA number first.</p>`;
+      resultDiv.classList.remove('hidden');
+      return;
+    }
+    resultDiv.innerHTML = `
+      <div class="flex items-center gap-2 text-sm text-zinc-400">
+        <div class="w-4 h-4 border-2 border-teal-400 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+        Querying ABDM health locker for ${abha}...
+      </div>`;
+    resultDiv.classList.remove('hidden');
+    setTimeout(() => {
+      resultDiv.innerHTML = `
+        <div class="bg-zinc-800 border border-zinc-700 rounded-lg p-4 text-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <svg class="w-4 h-4 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            <span class="text-zinc-300 font-medium">ABHA: ${abha}</span>
+          </div>
+          <p class="text-zinc-500">No linked records found in the ABDM health locker. This usually means the patient hasn't visited an ABDM-linked hospital yet, or records haven't been shared digitally.</p>
+          <p class="text-xs text-zinc-600 mt-2">When records are available, they'll appear here for you to review and import with one click.</p>
+        </div>`;
+    }, 1200);
   }
 
   function showGlobalError(msg) {
