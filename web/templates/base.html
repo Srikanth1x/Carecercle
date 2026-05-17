@@ -11,17 +11,28 @@
 
   <nav class="bg-zinc-900 border-b border-zinc-800 px-6 py-3 flex items-center gap-6">
     <a href="/dashboard" class="font-semibold text-teal-400 text-base tracking-tight">CareCircle</a>
-    <a href="/dashboard" class="text-zinc-300 hover:text-white text-sm transition-colors">Dashboard</a>
-    <a href="/medications" class="text-zinc-300 hover:text-white text-sm transition-colors">Medications</a>
-    <a href="/labs" class="text-zinc-300 hover:text-white text-sm transition-colors">Labs</a>
-    <a href="/timeline" class="text-zinc-300 hover:text-white text-sm transition-colors">Timeline</a>
-    <a href="/alerts" class="text-zinc-300 hover:text-white text-sm transition-colors">Alerts</a>
-    <a href="/appointments" class="text-zinc-300 hover:text-white text-sm transition-colors">Appointments</a>
+    <a href="/dashboard" class="nav-link text-zinc-300 hover:text-white text-sm transition-colors">Dashboard</a>
+    <a href="/medications" class="nav-link text-zinc-300 hover:text-white text-sm transition-colors">Medications</a>
+    <a href="/labs" class="nav-link text-zinc-300 hover:text-white text-sm transition-colors">Labs</a>
+    <a href="/timeline" class="nav-link text-zinc-300 hover:text-white text-sm transition-colors">Timeline</a>
+    <a href="/alerts" class="nav-link text-zinc-300 hover:text-white text-sm transition-colors">Alerts</a>
+    <a href="/appointments" class="nav-link text-zinc-300 hover:text-white text-sm transition-colors">Appointments</a>
     <span class="ml-auto flex items-center gap-4">
       <a href="/upload" class="bg-teal-500/10 border border-teal-500/30 text-teal-400 hover:bg-teal-500/20 text-sm px-3 py-1 rounded transition-colors">+ Upload</a>
       <a href="/logout" class="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">Logout</a>
     </span>
   </nav>
+  <script>
+    const path = location.pathname.split('/')[1];
+    document.querySelectorAll('.nav-link').forEach(a => {
+      const href = a.getAttribute('href').replace('/', '');
+      const match = href === '' ? path === '' || path === 'dashboard' : path === href;
+      if (match) {
+        a.classList.add('text-teal-400', 'font-medium');
+        a.classList.remove('text-zinc-300');
+      }
+    });
+  </script>
 
   <main class="max-w-5xl mx-auto px-4 py-6">
     {% block content %}{% endblock %}
