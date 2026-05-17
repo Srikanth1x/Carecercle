@@ -560,6 +560,20 @@ async def cron_silence(request: Request):
     await check_silence(bot=ptb.bot)
     return JSONResponse({"ok": True})
 
+@app.get("/cron/wipe-demo")
+async def wipe_demo(request: Request, user: dict = Depends(require_user)):
+    from database.supabase_client import get_client
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return JSONResponse({"error": "No patient"}, status_code=404)
+    pid = patient["id"]
+    db = get_client()
+    db.table("appointments").delete().eq("patient_id", pid).execute()
+    db.table("alerts").delete().eq("patient_id", pid).execute()
+    db.table("care_events").delete().eq("patient_id", pid).execute()
+    return JSONResponse({"ok": True, "wiped": ["appointments", "alerts", "care_events"]})
+
+
 @app.get("/cron/seed-demo")
 async def seed_demo(request: Request, user: dict = Depends(require_user)):
     from datetime import date, datetime, timedelta, timezone

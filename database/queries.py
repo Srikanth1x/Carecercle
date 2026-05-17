@@ -34,12 +34,18 @@ def create_patient(user_id: str, data: dict) -> dict:
 def get_or_create_doctor(name: str, specialty: str = None, hospital: str = None) -> dict | None:
     if not name or not name.strip():
         return None
-    doctor = get_doctor_by_name(name.strip())
+    # Strip leading "Dr." so templates that add "Dr." don't double it
+    clean = name.strip()
+    for prefix in ("Dr. ", "Dr."):
+        if clean.startswith(prefix):
+            clean = clean[len(prefix):].strip()
+            break
+    doctor = get_doctor_by_name(clean)
     if doctor:
         return doctor
     db = get_client()
     result = db.table("doctors").insert({
-        "name": name.strip(),
+        "name": clean,
         "specialty": specialty,
         "hospital": hospital,
     }).execute()
