@@ -560,6 +560,66 @@ async def cron_silence(request: Request):
     await check_silence(bot=ptb.bot)
     return JSONResponse({"ok": True})
 
+@app.get("/cron/seed-demo")
+async def seed_demo(request: Request):
+    if not _check_cron_auth(request):
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    from datetime import date, datetime, timedelta, timezone
+    from database.queries import insert_care_event, insert_appointment, insert_alert, get_or_create_doctor
+    from database.auth_queries import get_all_linked_users
+    from database.supabase_client import get_client
+
+    # Find the patient for the linked user
+    users = get_all_linked_users()
+    if not users:
+        return JSONResponse({"error": "No linked users"}, status_code=404)
+
+    db = get_client()
+    res = db.table("patients").select("*").execute()
+    if not res.data:
+        return JSONResponse({"error": "No patients found"}, status_code=404)
+    patient = res.data[0]
+    pid = patient["id"]
+
+    now = datetime.now(timezone.utc)
+    today = date.today()
+    seeded = {"appointments": 0, "events": 0, "alerts": 0}
+
+    appt_data = [
+        {"doctor": "Venkata Lakshmi", "specialty": "Cardiology", "hospital": "Apollo Hospitals, Hyderabad", "days": 12, "type": "Follow-up", "notes": "Review echocardiogram results and adjust Diltiazem dose.", "prerequisites": ["ECG", "2D Echo repeat"], "prereq_status": "pending"},
+        {"doctor": "Annapurna", "specialty": "Endocrinology", "hospital": "KIMS Hospital, Secunderabad", "days": 22, "type": "Routine check", "notes": "HbA1c follow-up — target below 7.5%.", "prerequisites": ["Fasting Blood Sugar", "HbA1c"], "prereq_status": "pending"},
+        {"doctor": "Srinivasa Rao", "specialty": "General Physician", "hospital": "Rao Clinic, Secunderabad", "days": 5, "type": "Routine check", "notes": "Monthly BP review and medication refill.", "prerequisites": [], "prereq_status": "done"},
+    ]
+    for a in appt_data:
+        doc = get_or_create_doctor(a["doctor"], specialty=a["specialty"], hospital=a["hospital"])
+        insert_appointment(pid, {"doctor_id": doc["id"] if doc else None, "appointment_date": (today + timedelta(days=a["days"])).isoformat() + "T10:00:00", "appointment_type": a["type"], "hospital": a["hospital"], "notes": a["notes"], "prerequisites": a["prerequisites"] or None, "prerequisite_status": a["prereq_status"]})
+        seeded["appointments"] += 1
+
+    events = [
+        {"h": 2, "type": "observation", "desc": "Morning BP: 142/88 mmHg. Slightly elevated. Took Amlodipine 5mg after breakfast.", "sev": "attention", "src": "caregiver_update"},
+        {"h": 5, "type": "medication_taken", "desc": "All morning medications taken on time: Metformin 500mg, Levothyroxine 50mcg, Aspirin 75mg.", "sev": "normal", "src": "caregiver_update"},
+        {"h": 26, "type": "symptom", "desc": "Mild dizziness reported after lunch. Lasted ~20 minutes. Blood sugar checked: 168 mg/dL post-meal.", "sev": "attention", "src": "caregiver_update"},
+        {"h": 30, "type": "medication_taken", "desc": "All medications taken. Skipped evening walk due to rain.", "sev": "normal", "src": "caregiver_update"},
+        {"h": 50, "type": "observation", "desc": "Fasting blood sugar: 142 mg/dL. Slightly above target. Dietary adjustments discussed.", "sev": "attention", "src": "caregiver_update"},
+        {"h": 72, "type": "doctor_visit", "desc": "GP visit with Dr. Srinivasa Rao. BP log reviewed. Continuing current medications. Next visit in 5 days.", "sev": "normal", "src": "manual"},
+        {"h": 96, "type": "medication_taken", "desc": "Missed evening Metformin dose. Patient forgot — caregiver reminded via call.", "sev": "attention", "src": "caregiver_update"},
+    ]
+    for e in events:
+        insert_care_event(pid, {"event_type": e["type"], "event_description": e["desc"], "event_timestamp": (now - timedelta(hours=e["h"])).isoformat(), "severity": e["sev"], "reported_by": "caregiver", "source_type": e["src"]})
+        seeded["events"] += 1
+
+    alert_data = [
+        {"title": "HbA1c above target — 8.2%", "body": "Latest HbA1c is 8.2%, above the 7.5% target. Review with Dr. Annapurna at upcoming endocrinology appointment.", "sev": "warning", "cat": "lab_result"},
+        {"title": "ECG and Echo not yet scheduled", "body": "Cardiology follow-up with Dr. Venkata Lakshmi is in 12 days. ECG and 2D Echo are prerequisites and have not been booked.", "sev": "warning", "cat": "appointment_prereq"},
+        {"title": "Medication refill due in 5 days", "body": "Diltiazem 60mg and Clopidogrel 75mg supply estimated to run out in ~5 days. Contact Rao Clinic for prescription renewal.", "sev": "moderate", "cat": "medication"},
+    ]
+    for a in alert_data:
+        insert_alert(pid, {"title": a["title"], "body": a["body"], "severity": a["sev"], "category": a["cat"], "status": "active"})
+        seeded["alerts"] += 1
+
+    return JSONResponse({"ok": True, "seeded": seeded, "patient": patient["full_name"]})
+
+
 @app.get("/api/story")
 async def care_story(request: Request, user: dict = Depends(require_user)):
     patient = get_patient_by_user_id(user["id"])
