@@ -1,10 +1,11 @@
 import asyncio
 import logging
-from fastapi import FastAPI, Request, Depends, Form
+import os
+import tempfile
+from fastapi import FastAPI, Request, Depends, Form, UploadFile, File
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, RedirectResponse
-import os
 
 from config.settings import CRON_SECRET
 from web.auth import (
@@ -98,8 +99,12 @@ async def login_submit(request: Request, email: str = Form(...), password: str =
         return templates.TemplateResponse("login.html", {
             "request": request, "error": "Invalid email or password.", "registered": None
         })
-    response = RedirectResponse("/dashboard", status_code=303)
-    set_session_cookie(response, result["access_token"])
+    token = result["access_token"]
+    user_id = (result.get("user") or {}).get("id", "")
+    has_patient = bool(user_id and get_patient_by_user_id(user_id))
+    dest = "/dashboard" if has_patient else "/setup"
+    response = RedirectResponse(dest, status_code=303)
+    set_session_cookie(response, token)
     return response
 
 @app.get("/register")
@@ -123,22 +128,24 @@ async def logout(request: Request):
     clear_session_cookie(response)
     return response
 
-# ---- Patient setup ----
+# ---- Setup wizard ----
 
-@app.get("/patient/add")
-async def add_patient_page(request: Request, user: dict = Depends(require_user)):
+@app.get("/setup")
+async def setup_page(request: Request, user: dict = Depends(require_user)):
     if get_patient_by_user_id(user["id"]):
         return RedirectResponse("/dashboard")
-    return templates.TemplateResponse("add_patient.html", {"request": request, "error": None})
+    return templates.TemplateResponse("setup.html", {"request": request, "error": None})
 
-@app.post("/patient/add")
-async def add_patient_submit(
+@app.post("/setup")
+async def setup_submit(
     request: Request, user: dict = Depends(require_user),
     full_name: str = Form(...),
     date_of_birth: str = Form(""),
     gender: str = Form(""),
     blood_group: str = Form(""),
     phone: str = Form(""),
+    abha_id: str = Form(""),
+    abha_address: str = Form(""),
     emergency_contact_name: str = Form(""),
     emergency_contact_phone: str = Form(""),
     address_city: str = Form(""),
@@ -153,6 +160,8 @@ async def add_patient_submit(
             "gender": gender or None,
             "blood_group": blood_group or None,
             "phone": phone or None,
+            "abha_id": abha_id.replace("-", "").strip() or None,
+            "abha_address": abha_address.strip() or None,
             "emergency_contact_name": emergency_contact_name or None,
             "emergency_contact_phone": emergency_contact_phone or None,
             "address_city": address_city or None,
@@ -160,12 +169,123 @@ async def add_patient_submit(
             "known_conditions": conditions,
         }
         create_patient(user["id"], data)
-        return RedirectResponse("/dashboard", status_code=303)
+        return RedirectResponse("/upload", status_code=303)
     except Exception as e:
         logger.exception("Failed to create patient")
-        return templates.TemplateResponse("add_patient.html", {
+        return templates.TemplateResponse("setup.html", {
             "request": request, "error": str(e)
         })
+
+# ---- Upload records ----
+
+@app.get("/upload")
+async def upload_page(request: Request, user: dict = Depends(require_user)):
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return RedirectResponse("/setup")
+    return templates.TemplateResponse("upload.html", {"request": request, "patient": patient})
+
+@app.post("/upload/prescription")
+async def upload_prescription(
+    request: Request,
+    user: dict = Depends(require_user),
+    file: UploadFile = File(...),
+):
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return JSONResponse({"error": "No patient found"}, status_code=400)
+
+    suffix = os.path.splitext(file.filename or "")[1] or ".jpg"
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        tmp.write(await file.read())
+        tmp_path = tmp.name
+
+    try:
+        from ai.ocr import extract_prescription_from_photo
+        from ai.drug_interaction import check_drug_interactions
+        result = await extract_prescription_from_photo(tmp_path)
+    finally:
+        os.unlink(tmp_path)
+
+    pid = patient["id"]
+    saved, skipped = [], []
+    for med in result.get("medications", []):
+        doctor_id = None
+        if result.get("doctor_name"):
+            doc = get_or_create_doctor(result["doctor_name"],
+                                       specialty=result.get("doctor_specialty"),
+                                       hospital=result.get("hospital_name"))
+            doctor_id = doc["id"] if doc else None
+        outcome = insert_medication(pid, doctor_id, {
+            "drug_name": med["drug_name"],
+            "dosage": med.get("dosage", ""),
+            "frequency": med.get("frequency", ""),
+            "timing": med.get("timing"),
+            "route": med.get("route", "oral"),
+            "source_type": "photo_ocr",
+            "source_raw_text": str(result),
+            "status": "active",
+        })
+        if outcome.get("action") == "duplicate":
+            skipped.append(med["drug_name"])
+        else:
+            saved.append(med["drug_name"])
+
+    return JSONResponse({
+        "saved": saved,
+        "skipped": skipped,
+        "doctor": result.get("doctor_name"),
+        "date": result.get("date"),
+        "notes": result.get("notes"),
+        "confidence": result.get("confidence"),
+    })
+
+@app.post("/upload/lab-report")
+async def upload_lab_report(
+    request: Request,
+    user: dict = Depends(require_user),
+    file: UploadFile = File(...),
+):
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return JSONResponse({"error": "No patient found"}, status_code=400)
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        tmp.write(await file.read())
+        tmp_path = tmp.name
+
+    try:
+        from ai.pdf_parser import extract_lab_report_from_pdf
+        result = await extract_lab_report_from_pdf(tmp_path)
+    finally:
+        os.unlink(tmp_path)
+
+    pid = patient["id"]
+    saved, abnormal = [], []
+    import datetime
+    for test in result.get("tests", []):
+        insert_lab_report(pid, {
+            "test_name": test["test_name"],
+            "test_value": str(test["value"]),
+            "unit": test.get("unit"),
+            "reference_range": test.get("reference_range"),
+            "is_abnormal": test.get("is_abnormal", False),
+            "test_date": result.get("date") or datetime.date.today().isoformat(),
+            "lab_name": result.get("lab_name"),
+            "source_type": "pdf_extract",
+            "source_raw_text": str(result),
+        })
+        saved.append(test["test_name"])
+        if test.get("is_abnormal"):
+            abnormal.append(test["test_name"])
+
+    return JSONResponse({
+        "saved": saved,
+        "abnormal": abnormal,
+        "lab_name": result.get("lab_name"),
+        "date": result.get("date"),
+        "notes": result.get("notes"),
+    })
 
 # ---- Dashboard ----
 
@@ -173,7 +293,7 @@ async def add_patient_submit(
 async def dashboard(request: Request, user: dict = Depends(require_user)):
     data = get_patient_data(user)
     if not data:
-        return templates.TemplateResponse("no_patient.html", {"request": request, "user": user})
+        return RedirectResponse("/setup", status_code=303)
     return templates.TemplateResponse("dashboard.html", {"request": request, **data})
 
 # ---- Medications ----

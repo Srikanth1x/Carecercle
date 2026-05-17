@@ -17,9 +17,14 @@ def create_patient(user_id: str, data: dict) -> dict:
     db = get_client()
     name = data.get("full_name", "patient")
     first = name.split()[0].lower()
-    abha_id = str(random.randint(10000000000000, 99999999999999))
-    abha_address = f"{first}.{random.randint(1000, 9999)}@carecircle"
-    record = {"user_id": user_id, "abha_id": abha_id, "abha_address": abha_address, **data}
+    fallback_abha_id = str(random.randint(10000000000000, 99999999999999))
+    fallback_abha_address = f"{first}.{random.randint(1000, 9999)}@carecircle"
+    record = {
+        "user_id": user_id,
+        "abha_id": data.get("abha_id") or fallback_abha_id,
+        "abha_address": data.get("abha_address") or fallback_abha_address,
+        **{k: v for k, v in data.items() if k not in ("abha_id", "abha_address")},
+    }
     result = db.table("patients").insert(record).execute()
     if not result.data:
         raise RuntimeError("Failed to create patient")

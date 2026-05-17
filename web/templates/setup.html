@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareCircle — Set Up Patient</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex items-start justify-center pt-10 pb-16 px-4">
+
+<div class="w-full max-w-lg">
+
+  <!-- Logo -->
+  <div class="text-center mb-8">
+    <span class="font-bold text-teal-400 text-xl tracking-tight">CareCircle</span>
+    <p class="text-zinc-500 text-sm mt-1">Set up the person you are managing</p>
+  </div>
+
+  <!-- Step indicator -->
+  <div class="flex items-center justify-center gap-2 mb-8" id="step-dots">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold step-dot active" data-step="1">1</div>
+    <div class="h-px w-8 bg-zinc-700"></div>
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold step-dot" data-step="2">2</div>
+    <div class="h-px w-8 bg-zinc-700"></div>
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold step-dot" data-step="3">3</div>
+  </div>
+
+  {% if error %}
+    <div class="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg mb-4">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="/setup" id="setup-form">
+
+    <!-- Step 1: Basic info -->
+    <div class="step-panel" id="panel-1">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4">
+        <h2 class="text-lg font-semibold text-white">Who are you managing?</h2>
+        <p class="text-sm text-zinc-500">Enter their basic details. You can update these later.</p>
+
+        <div>
+          <label class="block text-sm font-medium text-zinc-300 mb-1">Full Name <span class="text-red-400">*</span></label>
+          <input name="full_name" id="full_name" type="text" required placeholder="e.g. Rajesh Sharma"
+                 class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-zinc-300 mb-1">Date of Birth</label>
+            <input name="date_of_birth" type="date"
+                   class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 focus:outline-none focus:border-teal-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-zinc-300 mb-1">Gender</label>
+            <select name="gender" class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 focus:outline-none focus:border-teal-500">
+              <option value="">-- Select --</option>
+              <option>Male</option><option>Female</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-zinc-300 mb-1">Blood Group</label>
+            <select name="blood_group" class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 focus:outline-none focus:border-teal-500">
+              <option value="">-- Select --</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-zinc-300 mb-1">Phone</label>
+            <input name="phone" type="tel" placeholder="+91-98000 00001"
+                   class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-zinc-300 mb-1">City</label>
+            <input name="address_city" type="text" placeholder="e.g. Hyderabad"
+                   class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-zinc-300 mb-1">State</label>
+            <input name="address_state" type="text" placeholder="e.g. Telangana"
+                   class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+          </div>
+        </div>
+
+        <button type="button" onclick="goStep(2)"
+                class="w-full bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium py-2.5 rounded-lg transition-colors">
+          Continue
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: ABHA -->
+    <div class="step-panel hidden" id="panel-2">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4">
+        <h2 class="text-lg font-semibold text-white">ABHA Health ID</h2>
+        <p class="text-sm text-zinc-500">
+          Your parent likely has an ABHA number from the COVID vaccination drive.
+          It looks like <span class="text-zinc-300">64-5146-1161-4671</span>.
+        </p>
+
+        <div>
+          <label class="block text-sm font-medium text-zinc-300 mb-1">ABHA Number</label>
+          <input name="abha_id" type="text" placeholder="XX-XXXX-XXXX-XXXX"
+                 class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+          <p class="text-xs text-zinc-600 mt-1">14-digit number on their ABHA card</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-zinc-300 mb-1">ABHA Address</label>
+          <input name="abha_address" type="text" placeholder="e.g. 64514611614671@abdm"
+                 class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+        </div>
+
+        <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-300">
+          ABHA links all hospital records under one ID — AIIMS, Apollo, government hospitals. You can skip this and add it later.
+        </div>
+
+        <div class="flex gap-3">
+          <button type="button" onclick="goStep(1)"
+                  class="flex-1 border border-zinc-700 text-zinc-400 hover:text-white font-medium py-2.5 rounded-lg transition-colors text-sm">
+            Back
+          </button>
+          <button type="button" onclick="goStep(3)"
+                  class="flex-1 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium py-2.5 rounded-lg transition-colors">
+            Continue
+          </button>
+        </div>
+        <div class="text-center">
+          <button type="button" onclick="goStep(3)" class="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
+            Skip for now
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Emergency contact + conditions -->
+    <div class="step-panel hidden" id="panel-3">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4">
+        <h2 class="text-lg font-semibold text-white">Emergency Contact & Conditions</h2>
+        <p class="text-sm text-zinc-500">Used for alerts and the emergency card on the bot.</p>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-zinc-300 mb-1">Contact Name</label>
+            <input name="emergency_contact_name" type="text" placeholder="e.g. Meera Sharma"
+                   class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-zinc-300 mb-1">Contact Phone</label>
+            <input name="emergency_contact_phone" type="tel" placeholder="+91-98000 00002"
+                   class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-zinc-300 mb-1">Known Conditions</label>
+          <input name="known_conditions" type="text" placeholder="e.g. Type 2 Diabetes, Hypertension"
+                 class="w-full rounded-lg px-3 py-2 text-sm border bg-zinc-800 border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+          <p class="text-xs text-zinc-600 mt-1">Comma-separated</p>
+        </div>
+
+        <div class="flex gap-3">
+          <button type="button" onclick="goStep(2)"
+                  class="flex-1 border border-zinc-700 text-zinc-400 hover:text-white font-medium py-2.5 rounded-lg transition-colors text-sm">
+            Back
+          </button>
+          <button type="submit"
+                  class="flex-1 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium py-2.5 rounded-lg transition-colors">
+            Create Profile
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<style>
+  .step-dot {
+    background: #27272a;
+    border: 1px solid #3f3f46;
+    color: #71717a;
+    transition: all 0.2s;
+  }
+  .step-dot.active {
+    background: #14b8a6;
+    border-color: #14b8a6;
+    color: #09090b;
+  }
+  .step-dot.done {
+    background: #134e4a;
+    border-color: #2dd4bf;
+    color: #2dd4bf;
+  }
+</style>
+
+<script>
+  function goStep(n) {
+    const full_name = document.getElementById('full_name');
+    if (n > 1 && !full_name.value.trim()) {
+      full_name.focus();
+      full_name.classList.add('border-red-500');
+      return;
+    }
+    full_name.classList.remove('border-red-500');
+
+    document.querySelectorAll('.step-panel').forEach((p, i) => {
+      p.classList.toggle('hidden', i + 1 !== n);
+    });
+    document.querySelectorAll('.step-dot').forEach((d, i) => {
+      const step = i + 1;
+      d.classList.remove('active', 'done');
+      if (step === n) d.classList.add('active');
+      else if (step < n) d.classList.add('done');
+    });
+  }
+</script>
+
+</body>
+</html>

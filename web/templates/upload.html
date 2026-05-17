@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Upload Records{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-white">Upload Records</h1>
+    <p class="text-sm text-zinc-500 mt-1">
+      For {{ patient.full_name }} &mdash; drag and drop or click to browse.
+      AI will read the document and save the data automatically.
+    </p>
+  </div>
+
+  <!-- Result banner -->
+  <div id="result-banner" class="hidden mb-5 rounded-xl p-4 border text-sm"></div>
+
+  <!-- Upload cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+    <!-- Prescription card -->
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex flex-col gap-4">
+      <div>
+        <h2 class="font-semibold text-white text-base">Prescription</h2>
+        <p class="text-xs text-zinc-500 mt-0.5">Photo of a prescription slip (JPG, PNG, WEBP)</p>
+      </div>
+
+      <label id="rx-label"
+             class="flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 rounded-lg py-8 px-4 cursor-pointer hover:border-teal-500/50 transition-colors group">
+        <input type="file" id="rx-input" accept="image/jpeg,image/png,image/webp" class="hidden" />
+        <div id="rx-icon" class="text-zinc-500 group-hover:text-teal-400 transition-colors mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+        </div>
+        <span id="rx-label-text" class="text-sm text-zinc-500 group-hover:text-zinc-300 transition-colors">Click or drop image here</span>
+      </label>
+
+      <button id="rx-btn" disabled onclick="uploadFile('rx')"
+              class="w-full bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm">
+        Read Prescription
+      </button>
+
+      <div id="rx-spinner" class="hidden text-center text-sm text-zinc-400 py-2">
+        <div class="inline-block w-4 h-4 border-2 border-teal-400 border-t-transparent rounded-full animate-spin mr-2"></div>
+        AI is reading your prescription...
+      </div>
+    </div>
+
+    <!-- Lab Report card -->
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 flex flex-col gap-4">
+      <div>
+        <h2 class="font-semibold text-white text-base">Lab Report</h2>
+        <p class="text-xs text-zinc-500 mt-0.5">Hospital lab report PDF</p>
+      </div>
+
+      <label id="lab-label"
+             class="flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 rounded-lg py-8 px-4 cursor-pointer hover:border-teal-500/50 transition-colors group">
+        <input type="file" id="lab-input" accept="application/pdf" class="hidden" />
+        <div id="lab-icon" class="text-zinc-500 group-hover:text-teal-400 transition-colors mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <span id="lab-label-text" class="text-sm text-zinc-500 group-hover:text-zinc-300 transition-colors">Click or drop PDF here</span>
+      </label>
+
+      <button id="lab-btn" disabled onclick="uploadFile('lab')"
+              class="w-full bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium py-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed text-sm">
+        Read Lab Report
+      </button>
+
+      <div id="lab-spinner" class="hidden text-center text-sm text-zinc-400 py-2">
+        <div class="inline-block w-4 h-4 border-2 border-teal-400 border-t-transparent rounded-full animate-spin mr-2"></div>
+        AI is reading your lab report...
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Hint -->
+  <div class="mt-8 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-500">
+    <p class="font-medium text-zinc-400 mb-1">You can also send files directly to the bot</p>
+    <p>Message <span class="text-teal-400">@CarCercle_Bot</span> on Telegram with a prescription photo or lab PDF and it will process it the same way.</p>
+    <a href="/dashboard" class="text-teal-400 hover:text-teal-300 mt-3 inline-block transition-colors">Go to dashboard</a>
+  </div>
+
+</div>
+
+<script>
+  const files = { rx: null, lab: null };
+
+  function setupInput(type) {
+    const input = document.getElementById(`${type}-input`);
+    const btn = document.getElementById(`${type}-btn`);
+    const labelText = document.getElementById(`${type}-label-text`);
+
+    input.addEventListener('change', () => {
+      if (input.files[0]) {
+        files[type] = input.files[0];
+        labelText.textContent = input.files[0].name;
+        btn.disabled = false;
+      }
+    });
+
+    const label = document.getElementById(`${type}-label`);
+    label.addEventListener('dragover', e => { e.preventDefault(); label.classList.add('border-teal-500'); });
+    label.addEventListener('dragleave', () => label.classList.remove('border-teal-500'));
+    label.addEventListener('drop', e => {
+      e.preventDefault();
+      label.classList.remove('border-teal-500');
+      const f = e.dataTransfer.files[0];
+      if (f) {
+        files[type] = f;
+        labelText.textContent = f.name;
+        btn.disabled = false;
+      }
+    });
+  }
+
+  setupInput('rx');
+  setupInput('lab');
+
+  async function uploadFile(type) {
+    const file = files[type];
+    if (!file) return;
+
+    const endpoint = type === 'rx' ? '/upload/prescription' : '/upload/lab-report';
+    const btn = document.getElementById(`${type}-btn`);
+    const spinner = document.getElementById(`${type}-spinner`);
+    const banner = document.getElementById('result-banner');
+
+    btn.disabled = true;
+    spinner.classList.remove('hidden');
+    banner.classList.add('hidden');
+
+    const form = new FormData();
+    form.append('file', file);
+
+    try {
+      const res = await fetch(endpoint, { method: 'POST', body: form });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      if (type === 'rx') {
+        showRxResult(data, banner);
+      } else {
+        showLabResult(data, banner);
+      }
+    } catch (err) {
+      banner.className = 'mb-5 rounded-xl p-4 border text-sm bg-red-500/10 border-red-500/30 text-red-400';
+      banner.innerHTML = `<strong>Error:</strong> ${err.message}`;
+      banner.classList.remove('hidden');
+    } finally {
+      spinner.classList.add('hidden');
+      btn.disabled = false;
+    }
+  }
+
+  function showRxResult(data, banner) {
+    if (!data.saved?.length && !data.skipped?.length) {
+      banner.className = 'mb-5 rounded-xl p-4 border text-sm bg-amber-500/10 border-amber-500/30 text-amber-400';
+      banner.innerHTML = 'No medications could be extracted. Check the image quality or <a href="/medications/add" class="underline">add manually</a>.';
+    } else {
+      let html = '<div class="font-medium text-emerald-400 mb-2">Prescription processed</div>';
+      if (data.saved?.length) {
+        html += data.saved.map(m => `<div class="flex items-center gap-2 text-zinc-300"><span class="text-emerald-400">&#x2713;</span> ${m} added</div>`).join('');
+      }
+      if (data.skipped?.length) {
+        html += data.skipped.map(m => `<div class="flex items-center gap-2 text-zinc-500"><span>&#x2013;</span> ${m} already on file</div>`).join('');
+      }
+      if (data.doctor) html += `<div class="text-zinc-500 mt-1 text-xs">Doctor: ${data.doctor}</div>`;
+      if (data.notes) html += `<div class="text-zinc-500 mt-1 text-xs">Note: ${data.notes}</div>`;
+      html += `<a href="/medications" class="text-teal-400 hover:text-teal-300 text-xs mt-2 inline-block">View medications &rarr;</a>`;
+      banner.className = 'mb-5 rounded-xl p-4 border text-sm bg-emerald-500/10 border-emerald-500/30';
+      banner.innerHTML = html;
+    }
+    banner.classList.remove('hidden');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function showLabResult(data, banner) {
+    if (!data.saved?.length) {
+      banner.className = 'mb-5 rounded-xl p-4 border text-sm bg-amber-500/10 border-amber-500/30 text-amber-400';
+      banner.innerHTML = 'No lab tests could be extracted. Check the PDF or <a href="/labs/add" class="underline">add manually</a>.';
+    } else {
+      let html = '<div class="font-medium text-emerald-400 mb-2">Lab report processed</div>';
+      html += data.saved.map(t => {
+        const isAbnormal = data.abnormal?.includes(t);
+        return `<div class="flex items-center gap-2 ${isAbnormal ? 'text-amber-400' : 'text-zinc-300'}">
+          <span class="${isAbnormal ? 'text-amber-400' : 'text-emerald-400'}">${isAbnormal ? '&#x26A0;' : '&#x2713;'}</span> ${t}
+        </div>`;
+      }).join('');
+      if (data.lab_name) html += `<div class="text-zinc-500 mt-1 text-xs">Lab: ${data.lab_name}</div>`;
+      if (data.abnormal?.length) html += `<div class="text-amber-400 mt-1 text-xs">${data.abnormal.length} abnormal value(s) flagged</div>`;
+      html += `<a href="/labs" class="text-teal-400 hover:text-teal-300 text-xs mt-2 inline-block">View lab results &rarr;</a>`;
+      banner.className = 'mb-5 rounded-xl p-4 border text-sm bg-emerald-500/10 border-emerald-500/30';
+      banner.innerHTML = html;
+    }
+    banner.classList.remove('hidden');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
+{% endblock %}

@@ -8,8 +8,12 @@
     <p class="text-xs text-zinc-500 uppercase tracking-widest mb-1">Your parent</p>
     <h1 class="text-2xl font-bold text-white">{{ patient.full_name }}</h1>
     <p class="text-sm text-zinc-400 mt-1">
-      ABHA: {{ patient.abha_id }} &bull;
-      {{ patient.address_city }}, {{ patient.address_state }} &bull;
+      {% if patient.abha_id %}
+        <span class="inline-flex items-center gap-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-xs mr-2">ABHA {{ patient.abha_id[:2] }}-{{ patient.abha_id[2:6] }}-{{ patient.abha_id[6:10] }}-{{ patient.abha_id[10:] }}</span>
+      {% else %}
+        <a href="/setup" class="inline-flex items-center gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-teal-400 px-2 py-0.5 rounded text-xs mr-2 transition-colors">+ Add ABHA</a>
+      {% endif %}
+      {{ patient.address_city }}{% if patient.address_city and patient.address_state %}, {% endif %}{{ patient.address_state }} &bull;
       Blood Group: {{ patient.blood_group or "N/A" }}
     </p>
     <p class="text-sm mt-2">
