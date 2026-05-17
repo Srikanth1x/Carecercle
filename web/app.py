@@ -3,6 +3,7 @@ import logging
 import os
 import tempfile
 from fastapi import FastAPI, Request, Depends, Form, UploadFile, File
+from typing import List
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -185,107 +186,114 @@ async def upload_page(request: Request, user: dict = Depends(require_user)):
         return RedirectResponse("/setup")
     return templates.TemplateResponse("upload.html", {"request": request, "patient": patient})
 
-@app.post("/upload/prescription")
-async def upload_prescription(
+@app.post("/upload/analyze")
+async def upload_analyze(
     request: Request,
     user: dict = Depends(require_user),
-    file: UploadFile = File(...),
+    files: List[UploadFile] = File(...),
 ):
-    patient = get_patient_by_user_id(user["id"])
-    if not patient:
-        return JSONResponse({"error": "No patient found"}, status_code=400)
-
-    suffix = os.path.splitext(file.filename or "")[1] or ".jpg"
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        tmp.write(await file.read())
-        tmp_path = tmp.name
-
-    try:
-        from ai.ocr import extract_prescription_from_photo
-        from ai.drug_interaction import check_drug_interactions
-        result = await extract_prescription_from_photo(tmp_path)
-    finally:
-        os.unlink(tmp_path)
-
-    pid = patient["id"]
-    saved, skipped = [], []
-    for med in result.get("medications", []):
-        doctor_id = None
-        if result.get("doctor_name"):
-            doc = get_or_create_doctor(result["doctor_name"],
-                                       specialty=result.get("doctor_specialty"),
-                                       hospital=result.get("hospital_name"))
-            doctor_id = doc["id"] if doc else None
-        outcome = insert_medication(pid, doctor_id, {
-            "drug_name": med["drug_name"],
-            "dosage": med.get("dosage", ""),
-            "frequency": med.get("frequency", ""),
-            "timing": med.get("timing"),
-            "route": med.get("route", "oral"),
-            "source_type": "photo_ocr",
-            "source_raw_text": str(result),
-            "status": "active",
-        })
-        if outcome.get("action") == "duplicate":
-            skipped.append(med["drug_name"])
-        else:
-            saved.append(med["drug_name"])
-
-    return JSONResponse({
-        "saved": saved,
-        "skipped": skipped,
-        "doctor": result.get("doctor_name"),
-        "date": result.get("date"),
-        "notes": result.get("notes"),
-        "confidence": result.get("confidence"),
-    })
-
-@app.post("/upload/lab-report")
-async def upload_lab_report(
-    request: Request,
-    user: dict = Depends(require_user),
-    file: UploadFile = File(...),
-):
-    patient = get_patient_by_user_id(user["id"])
-    if not patient:
-        return JSONResponse({"error": "No patient found"}, status_code=400)
-
-    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-        tmp.write(await file.read())
-        tmp_path = tmp.name
-
-    try:
-        from ai.pdf_parser import extract_lab_report_from_pdf
-        result = await extract_lab_report_from_pdf(tmp_path)
-    finally:
-        os.unlink(tmp_path)
-
-    pid = patient["id"]
-    saved, abnormal = [], []
     import datetime
-    for test in result.get("tests", []):
-        insert_lab_report(pid, {
-            "test_name": test["test_name"],
-            "test_value": str(test["value"]),
-            "unit": test.get("unit"),
-            "reference_range": test.get("reference_range"),
-            "is_abnormal": test.get("is_abnormal", False),
-            "test_date": result.get("date") or datetime.date.today().isoformat(),
-            "lab_name": result.get("lab_name"),
-            "source_type": "pdf_extract",
-            "source_raw_text": str(result),
-        })
-        saved.append(test["test_name"])
-        if test.get("is_abnormal"):
-            abnormal.append(test["test_name"])
+    from ai.document_classifier import classify
+    from ai.ocr import extract_prescription_from_photo
+    from ai.pdf_parser import extract_lab_report_from_pdf
 
-    return JSONResponse({
-        "saved": saved,
-        "abnormal": abnormal,
-        "lab_name": result.get("lab_name"),
-        "date": result.get("date"),
-        "notes": result.get("notes"),
-    })
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return JSONResponse({"error": "No patient found"}, status_code=400)
+
+    pid = patient["id"]
+    results = []
+
+    for upload in files:
+        filename = upload.filename or "unknown"
+        suffix = os.path.splitext(filename)[1].lower() or ".bin"
+
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+            tmp.write(await upload.read())
+            tmp_path = tmp.name
+
+        file_result = {"filename": filename, "type": "other", "description": "", "saved": [], "skipped": [], "abnormal": [], "error": None}
+
+        try:
+            # Step 1: Classify
+            cls = await classify(tmp_path)
+            doc_type = cls.get("type", "other")
+            file_result["type"] = doc_type
+            file_result["description"] = cls.get("description", "")
+
+            # Step 2: Extract + Save
+            if doc_type == "prescription":
+                result = await extract_prescription_from_photo(tmp_path)
+                for med in result.get("medications", []):
+                    doctor_id = None
+                    if result.get("doctor_name"):
+                        doc = get_or_create_doctor(
+                            result["doctor_name"],
+                            specialty=result.get("doctor_specialty"),
+                            hospital=result.get("hospital_name"),
+                        )
+                        doctor_id = doc["id"] if doc else None
+                    outcome = insert_medication(pid, doctor_id, {
+                        "drug_name": med["drug_name"],
+                        "dosage": med.get("dosage", ""),
+                        "frequency": med.get("frequency", ""),
+                        "timing": med.get("timing"),
+                        "route": med.get("route", "oral"),
+                        "source_type": "photo_ocr",
+                        "source_raw_text": str(result),
+                        "status": "active",
+                    })
+                    if outcome.get("action") == "duplicate":
+                        file_result["skipped"].append(med["drug_name"])
+                    else:
+                        file_result["saved"].append(med["drug_name"])
+                if result.get("notes"):
+                    file_result["description"] = result["notes"]
+
+            elif doc_type in ("lab_report", "imaging_report", "other"):
+                result = await extract_lab_report_from_pdf(tmp_path) if suffix == ".pdf" else await extract_prescription_from_photo(tmp_path)
+                for test in result.get("tests", []):
+                    insert_lab_report(pid, {
+                        "test_name": test["test_name"],
+                        "test_value": str(test.get("value", "")),
+                        "unit": test.get("unit"),
+                        "reference_range": test.get("reference_range"),
+                        "is_abnormal": test.get("is_abnormal", False),
+                        "test_date": result.get("date") or datetime.date.today().isoformat(),
+                        "lab_name": result.get("lab_name"),
+                        "source_type": "pdf_extract",
+                        "source_raw_text": str(result),
+                    })
+                    file_result["saved"].append(test["test_name"])
+                    if test.get("is_abnormal"):
+                        file_result["abnormal"].append(test["test_name"])
+                if result.get("notes") and not file_result["description"]:
+                    file_result["description"] = result["notes"]
+
+            elif doc_type in ("discharge_summary", "vaccination_record"):
+                result = await extract_lab_report_from_pdf(tmp_path) if suffix == ".pdf" else {"tests": [], "notes": cls.get("description", "")}
+                insert_care_event(pid, {
+                    "event_type": "document",
+                    "event_description": cls.get("description", filename),
+                    "severity": "normal",
+                    "reported_by": "web_upload",
+                    "source_type": "pdf_extract",
+                    "source_raw_text": result.get("notes", ""),
+                })
+                file_result["saved"].append("Document logged")
+
+        except Exception as e:
+            logger.exception("Failed to process %s", filename)
+            file_result["error"] = str(e)
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+        results.append(file_result)
+
+    return JSONResponse({"results": results})
 
 # ---- Dashboard ----
 
