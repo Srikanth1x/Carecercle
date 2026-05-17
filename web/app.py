@@ -561,24 +561,13 @@ async def cron_silence(request: Request):
     return JSONResponse({"ok": True})
 
 @app.get("/cron/seed-demo")
-async def seed_demo(request: Request):
-    if not _check_cron_auth(request):
-        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+async def seed_demo(request: Request, user: dict = Depends(require_user)):
     from datetime import date, datetime, timedelta, timezone
     from database.queries import insert_care_event, insert_appointment, insert_alert, get_or_create_doctor
-    from database.auth_queries import get_all_linked_users
-    from database.supabase_client import get_client
 
-    # Find the patient for the linked user
-    users = get_all_linked_users()
-    if not users:
-        return JSONResponse({"error": "No linked users"}, status_code=404)
-
-    db = get_client()
-    res = db.table("patients").select("*").execute()
-    if not res.data:
-        return JSONResponse({"error": "No patients found"}, status_code=404)
-    patient = res.data[0]
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return JSONResponse({"error": "No patient found"}, status_code=404)
     pid = patient["id"]
 
     now = datetime.now(timezone.utc)
