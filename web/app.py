@@ -293,6 +293,14 @@ async def upload_analyze(
 
         results.append(file_result)
 
+    # Send emergency Telegram alert if any abnormal values found
+    all_abnormal = []
+    for r in results:
+        for flag in r.get("abnormal", []):
+            all_abnormal.append(f"{flag} ({r['filename']})")
+    if all_abnormal:
+        asyncio.create_task(_send_emergency_alerts(patient, all_abnormal))
+
     return JSONResponse({"results": results})
 
 # ---- Dashboard ----
@@ -551,6 +559,46 @@ async def cron_silence(request: Request):
     from bot.scheduler import check_silence
     await check_silence(bot=ptb.bot)
     return JSONResponse({"ok": True})
+
+@app.get("/api/story")
+async def care_story(request: Request, user: dict = Depends(require_user)):
+    patient = get_patient_by_user_id(user["id"])
+    if not patient:
+        return JSONResponse({"story": ""})
+    from ai.story_generator import generate_care_story
+    try:
+        story = await generate_care_story(patient)
+    except Exception as e:
+        logger.exception("Story generation failed")
+        story = ""
+    return JSONResponse({"story": story})
+
+
+async def _send_emergency_alerts(patient: dict, abnormal_items: list):
+    """Fire-and-forget: send Telegram alert when critical abnormal values are uploaded."""
+    try:
+        from database.auth_queries import get_all_linked_users
+        users = get_all_linked_users()
+        linked = [u for u in users if u.get("user_id") == patient.get("user_id") or True]
+        # Filter to only users for this patient's owner
+        patient_user_id = patient.get("user_id")
+        linked = [u for u in users if u.get("user_id") == patient_user_id]
+        if not linked:
+            return
+        ptb = await _get_ptb_app()
+        lines = "\n".join(f"• {item}" for item in abnormal_items[:8])
+        msg = (
+            f"🚨 *Abnormal values detected in uploaded documents*\n\n"
+            f"{lines}\n\n"
+            f"_Review these with {patient.get('full_name', 'your parent')}'s doctor._"
+        )
+        for u in linked:
+            chat_id = u.get("telegram_chat_id")
+            if chat_id:
+                await ptb.bot.send_message(chat_id=chat_id, text=msg, parse_mode="Markdown")
+    except Exception:
+        logger.exception("Emergency alert send failed")
+
 
 @app.get("/health")
 async def health():

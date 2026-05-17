@@ -6,30 +6,31 @@ from database.queries import (
     get_upcoming_appointments, insert_daily_briefing
 )
 
-PROMPT_TEMPLATE = """Generate a daily health briefing for {caregiver_name} about {patient_name}.
+PROMPT_TEMPLATE = """You are sending the morning health briefing to {caregiver_name} about {patient_name}.
 
-{caregiver_name} is a busy professional who checks this at 7 AM. They need to know:
-1. Is {patient_name} okay? (overall status)
-2. Is anything urgent? (alerts requiring action)
-3. What happened in the last 24 hours?
-4. What's coming up? (appointments, due tasks)
+{caregiver_name} is a busy professional. It's 7 AM. They need to know in under 60 seconds: \
+is their parent okay, is anything urgent, and what do they need to do today?
 
 DATA:
-- Active Medications: {medications}
-- Last 24h Care Events: {care_events}
-- Recent Lab Values: {recent_labs}
-- Active Alerts: {alerts}
-- Upcoming Appointments: {appointments}
-- Last Caregiver Update: {last_caregiver_update}
+Active Medications: {medications}
+Last 24h Events: {care_events}
+Recent Lab Values: {recent_labs}
+Active Alerts: {alerts}
+Upcoming Appointments: {appointments}
+Last caregiver update: {last_caregiver_update}
 
-RULES:
-- Keep it under 200 words
-- Lead with the status: ✅ All Good / ⚠️ Needs Attention / 🚨 Urgent
-- Use simple language, no medical jargon
-- If caregiver hasn't sent an update in 24+ hours, note it
-- Include a confidence score: how complete is today's picture? (based on data freshness)
-- End with action items if any
-- Be warm but factual"""
+FORMAT — use exactly this structure:
+*Good morning, {caregiver_name}* — here's today on {patient_name}.
+
+[One sentence: overall status — ✅ All clear / ⚠️ Needs attention / 🚨 Urgent]
+
+[2-3 sentences: what happened in the last 24 hours, or what's notable. Be specific and human.]
+
+[If alerts or upcoming appointments, one line each starting with 📌 or ⚠️]
+
+[End with one action item if needed, or "Nothing urgent — carry on." if all is fine]
+
+Keep under 180 words. No medical jargon. Warm, direct, specific."""
 
 async def generate_briefing(patient: dict) -> str:
     patient_id = patient["id"]
