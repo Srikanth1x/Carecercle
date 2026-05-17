@@ -22,6 +22,9 @@ async def call_gemini(prompt: str, image_path: str = None) -> str:
             response = await asyncio.to_thread(_sync_call)
             return response.text
         except Exception as e:
+            msg = str(e)
+            if "429" in msg or "quota" in msg.lower() or "RESOURCE_EXHAUSTED" in msg:
+                raise RuntimeError("Gemini API quota exceeded. Please enable billing at aistudio.google.com to continue using AI features.")
             if attempt < 2:
                 await asyncio.sleep(2 ** attempt)
                 continue
