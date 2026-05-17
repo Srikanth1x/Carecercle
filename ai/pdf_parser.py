@@ -47,6 +47,8 @@ def _parse_raw(raw: str) -> dict:
     end = raw.rfind("}") + 1
     if start != -1 and end > start:
         raw = raw[start:end]
+    # Fix trailing commas before } or ]
+    raw = re.sub(r",\s*([}\]])", r"\1", raw)
     return json.loads(raw)
 
 

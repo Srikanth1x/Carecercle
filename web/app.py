@@ -235,8 +235,8 @@ async def upload_analyze(
                         doctor_id = doc["id"] if doc else None
                     outcome = insert_medication(pid, doctor_id, {
                         "drug_name": med["drug_name"],
-                        "dosage": med.get("dosage", ""),
-                        "frequency": med.get("frequency", ""),
+                        "dosage": med.get("dosage") or "",
+                        "frequency": med.get("frequency") or "as directed",
                         "timing": med.get("timing"),
                         "route": med.get("route", "oral"),
                         "source_type": "photo_ocr",
