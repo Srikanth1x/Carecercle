@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import tempfile
 import fitz  # PyMuPDF
 from ai.gemini_client import call_gemini
@@ -37,12 +38,16 @@ def _sparse(text: str) -> bool:
 
 def _parse_raw(raw: str) -> dict:
     raw = raw.strip()
-    if raw.startswith("```"):
-        parts = raw.split("```")
-        raw = parts[1] if len(parts) > 1 else raw
-        if raw.startswith("json"):
-            raw = raw[4:]
-    return json.loads(raw.strip())
+    # Strip markdown code fences
+    raw = re.sub(r"^```[a-z]*\n?", "", raw)
+    raw = re.sub(r"\n?```$", "", raw)
+    raw = raw.strip()
+    # Find outermost JSON object
+    start = raw.find("{")
+    end = raw.rfind("}") + 1
+    if start != -1 and end > start:
+        raw = raw[start:end]
+    return json.loads(raw)
 
 
 async def _parse_text(text: str) -> dict:

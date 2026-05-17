@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import tempfile
 import fitz
 from ai.gemini_client import call_gemini
@@ -39,13 +40,14 @@ async def classify(file_path: str) -> dict:
         raw = await call_gemini(CLASSIFY_PROMPT, image_path=file_path)
 
     raw = raw.strip()
-    if raw.startswith("```"):
-        parts = raw.split("```")
-        raw = parts[1] if len(parts) > 1 else raw
-        if raw.startswith("json"):
-            raw = raw[4:]
+    raw = re.sub(r"^```[a-z]*\n?", "", raw)
+    raw = re.sub(r"\n?```$", "", raw)
+    raw = raw.strip()
+    start, end = raw.find("{"), raw.rfind("}") + 1
+    if start != -1 and end > start:
+        raw = raw[start:end]
     try:
-        return json.loads(raw.strip())
+        return json.loads(raw)
     except Exception:
         return {"type": "other", "confidence": 0.5, "description": "Could not classify document"}
 
