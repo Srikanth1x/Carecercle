@@ -4,10 +4,17 @@
 {% block content %}
 <div class="flex items-center justify-between mb-4">
   <h1 class="text-2xl font-bold text-white">Appointments</h1>
-  <a href="/appointments/add"
-     class="bg-teal-500 hover:bg-teal-400 text-zinc-950 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-    + Add Appointment
-  </a>
+  <div class="flex items-center gap-2">
+    <a href="/upload?hint=discharge"
+       class="bg-teal-500 hover:bg-teal-400 text-zinc-950 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+      Upload Summary
+    </a>
+    <a href="/appointments/add"
+       class="border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 px-3 py-2 rounded-lg text-sm transition-colors">
+      + Manual
+    </a>
+  </div>
 </div>
 
 <div class="space-y-3">

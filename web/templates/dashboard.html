@@ -73,10 +73,12 @@
 <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6">
   <div class="flex items-center justify-between mb-3">
     <h2 class="font-semibold text-lg text-white">Upcoming Appointments</h2>
-    <a href="/appointments/add"
-       class="bg-teal-500 hover:bg-teal-400 text-zinc-950 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
-      + Add
-    </a>
+    <div class="flex items-center gap-2">
+      <a href="/upload?hint=discharge"
+         class="bg-teal-500 hover:bg-teal-400 text-zinc-950 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">Upload</a>
+      <a href="/appointments/add"
+         class="border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition-colors">+ Manual</a>
+    </div>
   </div>
   {% if appts %}
     {% for a in appts %}
@@ -106,10 +108,12 @@
 <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
   <div class="flex items-center justify-between mb-3">
     <h2 class="font-semibold text-lg text-white">Recent Events</h2>
-    <a href="/events/add"
-       class="bg-teal-500 hover:bg-teal-400 text-zinc-950 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
-      + Add
-    </a>
+    <div class="flex items-center gap-2">
+      <a href="/upload"
+         class="bg-teal-500 hover:bg-teal-400 text-zinc-950 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">Upload</a>
+      <a href="/events/add"
+         class="border border-zinc-700 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-xs transition-colors">+ Manual</a>
+    </div>
   </div>
   {% if events %}
     {% for e in events[:5] %}

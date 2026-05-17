@@ -6,7 +6,7 @@
 
   <div class="mb-6">
     <h1 class="text-2xl font-bold text-white">Upload Health Records</h1>
-    <p class="text-sm text-zinc-500 mt-1">
+    <p class="text-sm text-zinc-500 mt-1" id="hint-text">
       For {{ patient.full_name }} &mdash; drop everything here. AI reads, classifies, and organises automatically.
     </p>
   </div>
@@ -89,6 +89,18 @@
 </div>
 
 <script>
+  // Context hint from referring page
+  const hints = {
+    prescription: { text: 'Drop your prescription photos or PDFs — AI will extract all medications automatically.', label: 'Prescriptions · Lab Reports · Any Medical File' },
+    lab: { text: 'Drop lab report PDFs or photos — AI extracts all test values and flags abnormal results.', label: 'Lab Reports · Blood Tests · Imaging Reports' },
+    discharge: { text: 'Drop discharge summaries or doctor letters — AI extracts diagnoses, follow-ups, and medications.', label: 'Discharge Summaries · Doctor Letters · Referrals' },
+  };
+  const hint = new URLSearchParams(location.search).get('hint');
+  if (hint && hints[hint]) {
+    document.getElementById('hint-text').textContent = hints[hint].text;
+    document.querySelector('#drop-zone p.text-xs.text-zinc-600').textContent = hints[hint].label;
+  }
+
   const selectedFiles = new DataTransfer();
 
   // Drop zone drag events
