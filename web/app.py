@@ -598,12 +598,12 @@ async def seed_demo(request: Request, user: dict = Depends(require_user)):
         seeded["events"] += 1
 
     alert_data = [
-        {"title": "HbA1c above target — 8.2%", "body": "Latest HbA1c is 8.2%, above the 7.5% target. Review with Dr. Annapurna at upcoming endocrinology appointment.", "sev": "warning", "cat": "lab_result"},
-        {"title": "ECG and Echo not yet scheduled", "body": "Cardiology follow-up with Dr. Venkata Lakshmi is in 12 days. ECG and 2D Echo are prerequisites and have not been booked.", "sev": "warning", "cat": "appointment_prereq"},
-        {"title": "Medication refill due in 5 days", "body": "Diltiazem 60mg and Clopidogrel 75mg supply estimated to run out in ~5 days. Contact Rao Clinic for prescription renewal.", "sev": "moderate", "cat": "medication"},
+        {"title": "HbA1c above target — 8.2%", "desc": "Latest HbA1c is 8.2%, above the 7.5% target. Review with Dr. Annapurna at upcoming endocrinology appointment.", "sev": "warning", "type": "lab_flag"},
+        {"title": "ECG and Echo not yet scheduled", "desc": "Cardiology follow-up with Dr. Venkata Lakshmi is in 12 days. ECG and 2D Echo are prerequisites and have not been booked.", "sev": "warning", "type": "appointment"},
+        {"title": "Medication refill due in 5 days", "desc": "Diltiazem 60mg and Clopidogrel 75mg supply estimated to run out in ~5 days. Contact Rao Clinic for prescription renewal.", "sev": "warning", "type": "medication"},
     ]
     for a in alert_data:
-        insert_alert(pid, {"title": a["title"], "body": a["body"], "severity": a["sev"], "category": a["cat"], "status": "active"})
+        insert_alert(pid, {"title": a["title"], "description": a["desc"], "severity": a["sev"], "alert_type": a["type"], "status": "active"})
         seeded["alerts"] += 1
 
     return JSONResponse({"ok": True, "seeded": seeded, "patient": patient["full_name"]})
