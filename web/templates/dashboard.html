@@ -10,7 +10,7 @@
     <p class="text-sm text-zinc-400 mt-1">
       {% if patient.abha_id %}
         <span class="inline-flex items-center gap-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-xs mr-2">
-          <img src="/static/abdm1.png" alt="ABDM" class="h-4 w-auto" />
+          <div class="abdm-logo" style="width:16px;height:16px;"></div>
           {{ patient.abha_id[:2] }}-{{ patient.abha_id[2:6] }}-{{ patient.abha_id[6:10] }}-{{ patient.abha_id[10:] }}
         </span>
       {% else %}
