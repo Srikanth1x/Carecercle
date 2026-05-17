@@ -1,4 +1,4 @@
-from ai.claude_client import call_claude
+from ai.gemini_client import call_gemini as call_claude
 from database.queries import (
     get_active_medications, get_recent_lab_reports,
     get_active_alerts, get_upcoming_appointments,
@@ -83,4 +83,4 @@ async def generate_care_story(patient: dict) -> str:
     )
 
     system = "You are a care assistant. Write warm, human, concise care snapshots for family caregivers."
-    return await call_claude(prompt, system=system)
+    return await call_claude(f"{system}\n\n{prompt}")

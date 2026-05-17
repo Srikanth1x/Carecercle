@@ -1,5 +1,5 @@
 from datetime import date, datetime, timezone, timedelta
-from ai.claude_client import call_claude
+from ai.gemini_client import call_gemini as call_claude
 from database.queries import (
     get_active_medications, get_recent_lab_reports,
     get_active_alerts, get_recent_care_events,
@@ -76,7 +76,7 @@ async def generate_briefing(patient: dict) -> str:
         last_caregiver_update=last_update,
     )
 
-    text = await call_claude(prompt, system=system)
+    text = await call_claude(f"{system}\n\n{prompt}")
 
     insert_daily_briefing(patient_id, {
         "briefing_date": today.isoformat(),
