@@ -16,10 +16,18 @@ def set_telegram_chat_id(user_id: str, telegram_chat_id: str) -> None:
     }).execute()
 
 def get_patient_by_user_id(user_id: str) -> dict | None:
+    """Returns the first patient for a user (kept for backward compatibility)."""
     db = get_client()
     result = db.table("patients").select("*") \
-        .eq("user_id", user_id).execute()
+        .eq("user_id", user_id).order("created_at").execute()
     return result.data[0] if result.data else None
+
+def get_patients_by_user_id(user_id: str) -> list:
+    """Returns all patients for a user, ordered by creation date."""
+    db = get_client()
+    result = db.table("patients").select("*") \
+        .eq("user_id", user_id).order("created_at").execute()
+    return result.data or []
 
 def get_all_linked_users() -> list:
     db = get_client()

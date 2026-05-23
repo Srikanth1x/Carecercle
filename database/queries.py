@@ -172,3 +172,25 @@ def get_doctor_by_name(name: str) -> dict | None:
     db = get_client()
     result = db.table("doctors").select("*").ilike("name", f"%{name}%").execute()
     return result.data[0] if result.data else None
+
+
+def create_share_link(patient_id: str) -> dict:
+    from abdm.sharing import generate_share_token
+    db = get_client()
+    token = generate_share_token()
+    result = db.table("share_links").insert({
+        "patient_id": patient_id,
+        "token": token,
+    }).execute()
+    if not result.data:
+        raise RuntimeError("Failed to create share link")
+    return result.data[0]
+
+
+def get_share_link_by_token(token: str) -> dict | None:
+    from datetime import datetime, timezone
+    db = get_client()
+    now = datetime.now(timezone.utc).isoformat()
+    result = db.table("share_links").select("*") \
+        .eq("token", token).gte("expires_at", now).execute()
+    return result.data[0] if result.data else None

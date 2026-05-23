@@ -13,7 +13,7 @@ from web.auth import (
     supabase_login, supabase_register, require_user,
     set_session_cookie, clear_session_cookie, RedirectException
 )
-from database.auth_queries import get_patient_by_user_id
+from database.auth_queries import get_patient_by_user_id, get_patients_by_user_id
 from database.queries import (
     create_patient, get_or_create_doctor,
     get_active_medications, get_recent_lab_reports, get_active_alerts,
@@ -51,10 +51,28 @@ async def redirect_exception_handler(request, exc):
 
 # ---- Helpers ----
 
-def get_patient_data(user: dict) -> dict | None:
-    patient = get_patient_by_user_id(user["id"])
-    if not patient:
+_PATIENT_COOKIE = "cc_patient"
+_PATIENT_COOKIE_MAX_AGE = 86400 * 30  # 30 days
+
+def _get_active_patient(user_id: str, cookie_patient_id: str = None) -> dict | None:
+    """Return the active patient for a user. Prefers cookie selection, falls back to first."""
+    all_patients = get_patients_by_user_id(user_id)
+    if not all_patients:
         return None
+    if cookie_patient_id:
+        match = next((p for p in all_patients if p["id"] == cookie_patient_id), None)
+        if match:
+            return match
+    return all_patients[0]
+
+def get_patient_data(user: dict, active_patient_id: str = None) -> dict | None:
+    all_patients = get_patients_by_user_id(user["id"])
+    if not all_patients:
+        return None
+    if active_patient_id:
+        patient = next((p for p in all_patients if p["id"] == active_patient_id), all_patients[0])
+    else:
+        patient = all_patients[0]
     pid = patient["id"]
     meds = get_active_medications(pid)
     labs = get_recent_lab_reports(pid, days=90)
@@ -64,7 +82,7 @@ def get_patient_data(user: dict) -> dict | None:
     has_critical = any(a["severity"] == "critical" for a in alerts)
     has_warning = any(a["severity"] in ("warning", "moderate") for a in alerts) or any(l["is_abnormal"] for l in labs)
     status = "critical" if has_critical else ("warning" if has_warning else "ok")
-    return dict(patient=patient, meds=meds, labs=labs, alerts=alerts,
+    return dict(patient=patient, all_patients=all_patients, meds=meds, labs=labs, alerts=alerts,
                 events=events, appts=appts, status=status)
 
 def _check_cron_auth(request: Request) -> bool:
@@ -102,10 +120,13 @@ async def login_submit(request: Request, email: str = Form(...), password: str =
         })
     token = result["access_token"]
     user_id = (result.get("user") or {}).get("id", "")
-    has_patient = bool(user_id and get_patient_by_user_id(user_id))
-    dest = "/dashboard" if has_patient else "/setup"
+    first_patient = get_patient_by_user_id(user_id) if user_id else None
+    dest = "/dashboard" if first_patient else "/setup"
     response = RedirectResponse(dest, status_code=303)
     set_session_cookie(response, token)
+    if first_patient:
+        response.set_cookie(_PATIENT_COOKIE, first_patient["id"],
+                            httponly=True, samesite="lax", max_age=_PATIENT_COOKIE_MAX_AGE)
     return response
 
 @app.get("/register")
@@ -127,9 +148,10 @@ async def register_submit(request: Request, email: str = Form(...), password: st
 async def logout(request: Request):
     response = RedirectResponse("/login")
     clear_session_cookie(response)
+    response.delete_cookie(_PATIENT_COOKIE)
     return response
 
-# ---- Setup wizard ----
+# ---- Setup wizard (first patient) ----
 
 @app.get("/setup")
 async def setup_page(request: Request, user: dict = Depends(require_user)):
@@ -169,22 +191,91 @@ async def setup_submit(
             "address_state": address_state or None,
             "known_conditions": conditions,
         }
-        create_patient(user["id"], data)
-        return RedirectResponse("/upload", status_code=303)
+        patient = create_patient(user["id"], data)
+        response = RedirectResponse("/upload", status_code=303)
+        response.set_cookie(_PATIENT_COOKIE, patient["id"],
+                            httponly=True, samesite="lax", max_age=_PATIENT_COOKIE_MAX_AGE)
+        return response
     except Exception as e:
         logger.exception("Failed to create patient")
         return templates.TemplateResponse("setup.html", {
             "request": request, "error": str(e)
         })
 
+# ---- Add another patient ----
+
+@app.get("/patient/new")
+async def new_patient_page(request: Request, user: dict = Depends(require_user)):
+    return templates.TemplateResponse("setup.html", {
+        "request": request, "error": None, "form_action": "/patient/new"
+    })
+
+@app.post("/patient/new")
+async def new_patient_submit(
+    request: Request, user: dict = Depends(require_user),
+    full_name: str = Form(...),
+    date_of_birth: str = Form(""),
+    gender: str = Form(""),
+    blood_group: str = Form(""),
+    phone: str = Form(""),
+    abha_id: str = Form(""),
+    abha_address: str = Form(""),
+    emergency_contact_name: str = Form(""),
+    emergency_contact_phone: str = Form(""),
+    address_city: str = Form(""),
+    address_state: str = Form(""),
+    known_conditions: str = Form(""),
+):
+    try:
+        conditions = [c.strip() for c in known_conditions.split(",") if c.strip()] if known_conditions else []
+        data = {
+            "full_name": full_name,
+            "date_of_birth": date_of_birth or None,
+            "gender": gender or None,
+            "blood_group": blood_group or None,
+            "phone": phone or None,
+            "abha_id": abha_id.replace("-", "").strip() or None,
+            "abha_address": abha_address.strip() or None,
+            "emergency_contact_name": emergency_contact_name or None,
+            "emergency_contact_phone": emergency_contact_phone or None,
+            "address_city": address_city or None,
+            "address_state": address_state or None,
+            "known_conditions": conditions,
+        }
+        patient = create_patient(user["id"], data)
+        response = RedirectResponse("/dashboard", status_code=303)
+        response.set_cookie(_PATIENT_COOKIE, patient["id"],
+                            httponly=True, samesite="lax", max_age=_PATIENT_COOKIE_MAX_AGE)
+        return response
+    except Exception as e:
+        logger.exception("Failed to create patient")
+        return templates.TemplateResponse("setup.html", {
+            "request": request, "error": str(e), "form_action": "/patient/new"
+        })
+
+# ---- Patient switcher ----
+
+@app.get("/patients/switch/{patient_id}")
+async def switch_patient(patient_id: str, request: Request, user: dict = Depends(require_user)):
+    all_patients = get_patients_by_user_id(user["id"])
+    if not any(p["id"] == patient_id for p in all_patients):
+        return RedirectResponse("/dashboard")
+    response = RedirectResponse("/dashboard", status_code=303)
+    response.set_cookie(_PATIENT_COOKIE, patient_id,
+                        httponly=True, samesite="lax", max_age=_PATIENT_COOKIE_MAX_AGE)
+    return response
+
 # ---- Upload records ----
 
 @app.get("/upload")
 async def upload_page(request: Request, user: dict = Depends(require_user)):
-    patient = get_patient_by_user_id(user["id"])
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return RedirectResponse("/setup")
-    return templates.TemplateResponse("upload.html", {"request": request, "patient": patient})
+    all_patients = get_patients_by_user_id(user["id"])
+    return templates.TemplateResponse("upload.html", {
+        "request": request, "patient": patient, "all_patients": all_patients
+    })
 
 @app.post("/upload/analyze")
 async def upload_analyze(
@@ -197,7 +288,7 @@ async def upload_analyze(
     from ai.ocr import extract_prescription_from_photo
     from ai.pdf_parser import extract_lab_report_from_pdf
 
-    patient = get_patient_by_user_id(user["id"])
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return JSONResponse({"error": "No patient found"}, status_code=400)
 
@@ -307,7 +398,7 @@ async def upload_analyze(
 
 @app.get("/dashboard")
 async def dashboard(request: Request, user: dict = Depends(require_user)):
-    data = get_patient_data(user)
+    data = get_patient_data(user, request.cookies.get(_PATIENT_COOKIE))
     if not data:
         return RedirectResponse("/setup", status_code=303)
     return templates.TemplateResponse("dashboard.html", {"request": request, **data})
@@ -316,14 +407,14 @@ async def dashboard(request: Request, user: dict = Depends(require_user)):
 
 @app.get("/medications")
 async def medications(request: Request, user: dict = Depends(require_user)):
-    data = get_patient_data(user)
+    data = get_patient_data(user, request.cookies.get(_PATIENT_COOKIE))
     if not data:
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("medications.html", {"request": request, **data})
 
 @app.get("/medications/add")
 async def add_medication_page(request: Request, user: dict = Depends(require_user)):
-    if not get_patient_by_user_id(user["id"]):
+    if not _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE)):
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("add_medication.html", {"request": request, "error": None})
 
@@ -339,7 +430,7 @@ async def add_medication_submit(
     prescribed_date: str = Form(""),
     doctor_name: str = Form(""),
 ):
-    patient = get_patient_by_user_id(user["id"])
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return RedirectResponse("/dashboard")
     try:
@@ -366,14 +457,14 @@ async def add_medication_submit(
 
 @app.get("/labs")
 async def labs_page(request: Request, user: dict = Depends(require_user)):
-    data = get_patient_data(user)
+    data = get_patient_data(user, request.cookies.get(_PATIENT_COOKIE))
     if not data:
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("labs.html", {"request": request, **data})
 
 @app.get("/labs/add")
 async def add_lab_page(request: Request, user: dict = Depends(require_user)):
-    if not get_patient_by_user_id(user["id"]):
+    if not _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE)):
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("add_lab.html", {"request": request, "error": None})
 
@@ -388,7 +479,7 @@ async def add_lab_submit(
     lab_name: str = Form(""),
     is_abnormal: str = Form(""),
 ):
-    patient = get_patient_by_user_id(user["id"])
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return RedirectResponse("/dashboard")
     try:
@@ -412,14 +503,14 @@ async def add_lab_submit(
 
 @app.get("/timeline")
 async def timeline(request: Request, user: dict = Depends(require_user)):
-    data = get_patient_data(user)
+    data = get_patient_data(user, request.cookies.get(_PATIENT_COOKIE))
     if not data:
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("timeline.html", {"request": request, **data})
 
 @app.get("/events/add")
 async def add_event_page(request: Request, user: dict = Depends(require_user)):
-    if not get_patient_by_user_id(user["id"]):
+    if not _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE)):
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("add_event.html", {"request": request, "error": None})
 
@@ -431,7 +522,7 @@ async def add_event_submit(
     severity: str = Form("normal"),
     reported_by: str = Form(""),
 ):
-    patient = get_patient_by_user_id(user["id"])
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return RedirectResponse("/dashboard")
     try:
@@ -453,7 +544,7 @@ async def add_event_submit(
 
 @app.get("/appointments/add")
 async def add_appointment_page(request: Request, user: dict = Depends(require_user)):
-    if not get_patient_by_user_id(user["id"]):
+    if not _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE)):
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("add_appointment.html", {"request": request, "error": None})
 
@@ -467,7 +558,7 @@ async def add_appointment_submit(
     prerequisites: str = Form(""),
     notes: str = Form(""),
 ):
-    patient = get_patient_by_user_id(user["id"])
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return RedirectResponse("/dashboard")
     try:
@@ -491,11 +582,9 @@ async def add_appointment_submit(
             "request": request, "error": str(e)
         })
 
-# ---- Appointments list ----
-
 @app.get("/appointments")
 async def appointments_page(request: Request, user: dict = Depends(require_user)):
-    data = get_patient_data(user)
+    data = get_patient_data(user, request.cookies.get(_PATIENT_COOKIE))
     if not data:
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("appointments.html", {"request": request, **data})
@@ -504,14 +593,14 @@ async def appointments_page(request: Request, user: dict = Depends(require_user)
 
 @app.get("/alerts")
 async def alerts_page(request: Request, user: dict = Depends(require_user)):
-    data = get_patient_data(user)
+    data = get_patient_data(user, request.cookies.get(_PATIENT_COOKIE))
     if not data:
         return RedirectResponse("/dashboard")
     return templates.TemplateResponse("alerts.html", {"request": request, **data})
 
 @app.post("/alerts/{alert_id}/acknowledge")
-async def ack_alert(alert_id: str, user: dict = Depends(require_user)):
-    patient = get_patient_by_user_id(user["id"])
+async def ack_alert(alert_id: str, request: Request, user: dict = Depends(require_user)):
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return JSONResponse({"error": "Not found"}, status_code=404)
     alert = get_alert_by_id(alert_id)
@@ -519,6 +608,40 @@ async def ack_alert(alert_id: str, user: dict = Depends(require_user)):
         return JSONResponse({"error": "Not found"}, status_code=404)
     acknowledge_alert(alert_id)
     return JSONResponse({"status": "ok"})
+
+# ---- Share links ----
+
+@app.post("/share/generate")
+async def generate_share(request: Request, user: dict = Depends(require_user)):
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
+    if not patient:
+        return JSONResponse({"error": "No patient"}, status_code=404)
+    from database.queries import create_share_link
+    link = create_share_link(patient["id"])
+    base_url = str(request.base_url).rstrip("/")
+    return JSONResponse({"url": f"{base_url}/share/{link['token']}", "expires_in": "7 days"})
+
+@app.get("/share/{token}")
+async def share_view(token: str, request: Request):
+    from database.queries import get_share_link_by_token
+    from database.supabase_client import get_client
+    link = get_share_link_by_token(token)
+    if not link:
+        return templates.TemplateResponse("share.html", {"request": request, "expired": True})
+    pid = link["patient_id"]
+    db = get_client()
+    patient_result = db.table("patients").select("*").eq("id", pid).execute()
+    patient = patient_result.data[0] if patient_result.data else None
+    if not patient:
+        return templates.TemplateResponse("share.html", {"request": request, "expired": True})
+    meds = get_active_medications(pid)
+    labs = get_recent_lab_reports(pid, days=30)
+    alerts = get_active_alerts(pid)
+    appts = get_upcoming_appointments(pid)
+    return templates.TemplateResponse("share.html", {
+        "request": request, "expired": False,
+        "patient": patient, "meds": meds, "labs": labs, "alerts": alerts, "appts": appts
+    })
 
 # ---- Telegram webhook ----
 
@@ -563,7 +686,7 @@ async def cron_silence(request: Request):
 @app.get("/cron/test-briefing")
 async def test_briefing(request: Request, user: dict = Depends(require_user)):
     try:
-        patient = get_patient_by_user_id(user["id"])
+        patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
         if not patient:
             return JSONResponse({"error": "No patient"}, status_code=404)
         from database.auth_queries import get_all_linked_users
@@ -589,7 +712,7 @@ async def test_briefing(request: Request, user: dict = Depends(require_user)):
 @app.get("/cron/wipe-demo")
 async def wipe_demo(request: Request, user: dict = Depends(require_user)):
     from database.supabase_client import get_client
-    patient = get_patient_by_user_id(user["id"])
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return JSONResponse({"error": "No patient"}, status_code=404)
     pid = patient["id"]
@@ -605,7 +728,7 @@ async def seed_demo(request: Request, user: dict = Depends(require_user)):
     from datetime import date, datetime, timedelta, timezone
     from database.queries import insert_care_event, insert_appointment, insert_alert, get_or_create_doctor
 
-    patient = get_patient_by_user_id(user["id"])
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return JSONResponse({"error": "No patient found"}, status_code=404)
     pid = patient["id"]
@@ -651,7 +774,7 @@ async def seed_demo(request: Request, user: dict = Depends(require_user)):
 
 @app.get("/api/story")
 async def care_story(request: Request, user: dict = Depends(require_user)):
-    patient = get_patient_by_user_id(user["id"])
+    patient = _get_active_patient(user["id"], request.cookies.get(_PATIENT_COOKIE))
     if not patient:
         return JSONResponse({"story": ""})
     from ai.story_generator import generate_care_story
@@ -668,8 +791,6 @@ async def _send_emergency_alerts(patient: dict, abnormal_items: list):
     try:
         from database.auth_queries import get_all_linked_users
         users = get_all_linked_users()
-        linked = [u for u in users if u.get("user_id") == patient.get("user_id") or True]
-        # Filter to only users for this patient's owner
         patient_user_id = patient.get("user_id")
         linked = [u for u in users if u.get("user_id") == patient_user_id]
         if not linked:
