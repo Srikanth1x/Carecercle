@@ -1,5 +1,5 @@
 """
-Playwright smoke-test for carecercle.vercel.app
+Playwright smoke-test for getaayu.in
 Run:  python test_app.py
 Requires: pip install playwright && playwright install chromium
 """
@@ -7,7 +7,7 @@ import os
 import sys
 from playwright.sync_api import sync_playwright, expect
 
-BASE = "https://carecercle.vercel.app"
+BASE = "https://getaayu.in"
 EMAIL = "srikanthkarkampally01@gmail.com"
 PASSWORD = os.environ.get("CC_PASSWORD", "")
 

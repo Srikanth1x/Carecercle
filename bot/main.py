@@ -42,5 +42,5 @@ def create_app() -> Application:
 
 def run_bot():
     app = create_app()
-    print("CareCircle bot is running...")
+    print("Aayu bot is running...")
     app.run_polling(drop_pending_updates=True)

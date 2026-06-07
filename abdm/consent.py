@@ -17,7 +17,7 @@ def log_access(patient_id: str, requester_name: str, requester_role: str,
             "consent_status": "granted",
             "granted_by": "caregiver",
             "granted_at": datetime.now(timezone.utc).isoformat(),
-            "purpose": "CareCircle caregiver access"
+            "purpose": "Aayu caregiver access"
         }).execute()
     except Exception:
         logger.warning("Failed to write consent log for patient %s", patient_id)

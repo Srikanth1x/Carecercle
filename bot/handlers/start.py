@@ -3,10 +3,10 @@ from telegram.ext import ContextTypes
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "👋 Welcome to CareCircle!\n\n"
+        "👋 Welcome to Aayu!\n\n"
         "I help you remotely manage a loved one's health.\n\n"
         "To get started:\n"
-        "1. Register at the CareCircle website\n"
+        "1. Register at the Aayu website\n"
         "2. Send /connect here to link your Telegram account\n\n"
         "Once connected, you can:\n"
         "• Send a prescription photo → I'll extract and store the medicines\n"
@@ -18,7 +18,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "📋 *CareCircle Commands*\n\n"
+        "📋 *Aayu Commands*\n\n"
         "/connect — Link your Telegram to your web account\n"
         "/disconnect — Unlink your account\n\n"
         "/summary — Current snapshot: meds, vitals, recent events\n"

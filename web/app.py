@@ -25,7 +25,7 @@ from database.queries import (
 logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(__file__)
-app = FastAPI(title="CareCircle")
+app = FastAPI(title="Aayu")
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 

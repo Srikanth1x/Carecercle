@@ -4,7 +4,7 @@ End-to-end test of all data entry forms (assumes patient already linked).
 import sys
 from playwright.sync_api import sync_playwright
 
-BASE = "https://carecercle.vercel.app"
+BASE = "https://getaayu.in"
 EMAIL = "srikanthkarkampally01@gmail.com"
 PASSWORD = "123456"
 

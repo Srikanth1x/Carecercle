@@ -20,7 +20,7 @@ async def connect_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
     await update.message.reply_text(
-        "Let's link your Telegram to your CareCircle web account.\n\n"
+        "Let's link your Telegram to your Aayu web account.\n\n"
         "First, register at the web dashboard if you haven't yet.\n\n"
         "Please send your email address:"
     )
