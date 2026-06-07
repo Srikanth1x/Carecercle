@@ -34,7 +34,7 @@ def create_app() -> Application:
     app.add_handler(CommandHandler("briefing", briefing))
 
     app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-    app.add_handler(MessageHandler(filters.Document.PDF, handle_document))
+    app.add_handler(MessageHandler(filters.Document.PDF | filters.Document.IMAGE, handle_document))
     app.add_handler(MessageHandler(filters.VOICE, handle_voice))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 
