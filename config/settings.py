@@ -24,3 +24,8 @@ SESSION_SECRET = os.getenv("SESSION_SECRET", "")
 if not SESSION_SECRET:
     import logging
     logging.getLogger(__name__).critical("SESSION_SECRET env var is not set — sessions will not work")
+
+# ABDM Sandbox (Sprint 2)
+ABDM_CLIENT_ID = os.getenv("ABDM_CLIENT_ID", "")
+ABDM_CLIENT_SECRET = os.getenv("ABDM_CLIENT_SECRET", "")
+ABDM_BASE_URL = os.getenv("ABDM_BASE_URL", "https://sandbox.abdm.gov.in/api/v3")
