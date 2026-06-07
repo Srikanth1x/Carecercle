@@ -30,11 +30,24 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 "severity": event.get("severity", "normal"),
             })
 
+        events = result.get("events", [])
         alerts = result.get("alerts", [])
+
+        if not events:
+            await update.message.reply_text(
+                "I only record health updates.\n\n"
+                "Try something like:\n"
+                "- \"Dad took Metformin at 8am\"\n"
+                "- \"BP was 138/88 this morning\"\n"
+                "- \"Skipped evening dose, feeling dizzy\"\n\n"
+                "Use /help to see all commands."
+            )
+            return
+
         if alerts:
-            reply = "📝 Caregiver Update Recorded:\n\n" + "\n".join(alerts)
+            reply = "Update recorded.\n\n" + "\n".join(alerts)
         else:
-            reply = f"📝 Update recorded. {len(result.get('events', []))} event(s) saved. Everything looks normal."
+            reply = f"Update recorded. {len(events)} event(s) saved."
 
         await update.message.reply_text(reply)
 

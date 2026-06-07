@@ -1,34 +1,42 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
+WELCOME = """*Welcome to Aayu* -- AI health coordination for Indian families.
+
+I help you remotely manage your parent's health from anywhere.
+
+*Step 1 -- Create your account*
+Go to getaayu.in, register, and set up your patient's profile.
+
+*Step 2 -- Link Telegram*
+Send /connect here and enter your email + password.
+
+*Once connected you can:*
+- Send a prescription photo -- I extract and store all medicines
+- Send a lab report PDF -- I flag abnormal values instantly
+- Send a voice note or text -- I parse and record it as a care event
+- Type /summary -- get the current health snapshot
+- Type /sos -- instant emergency card with meds list and contacts
+
+*Commands*
+/connect -- Link your Aayu account
+/summary -- Health snapshot: meds, labs, alerts
+/meds -- All active medications
+/labs -- Recent lab results
+/appointments -- Upcoming appointments
+/briefing -- Today's AI briefing
+/check -- Drug interaction check
+/addappointment -- Add a new appointment
+/sos -- EMERGENCY crisis card
+/disconnect -- Unlink account
+/help -- Show this message
+
+You receive a personalised *7 AM daily briefing* automatically once connected.
+
+Questions? Email srikanthkarkampally01@gmail.com"""
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(
-        "👋 Welcome to Aayu!\n\n"
-        "I help you remotely manage a loved one's health.\n\n"
-        "To get started:\n"
-        "1. Register at the Aayu website\n"
-        "2. Send /connect here to link your Telegram account\n\n"
-        "Once connected, you can:\n"
-        "• Send a prescription photo → I'll extract and store the medicines\n"
-        "• Send a lab report PDF → I'll extract values and flag abnormals\n"
-        "• Send a text update from the caregiver → I'll parse and store it\n"
-        "• Send a voice note → I'll transcribe and store it\n\n"
-        "Type /help to see all commands."
-    )
+    await update.message.reply_text(WELCOME, parse_mode="Markdown")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(
-        "📋 *Aayu Commands*\n\n"
-        "/connect — Link your Telegram to your web account\n"
-        "/disconnect — Unlink your account\n\n"
-        "/summary — Current snapshot: meds, vitals, recent events\n"
-        "/meds — List all active medications\n"
-        "/labs — Recent lab results\n"
-        "/appointments — Upcoming appointments\n"
-        "/check — Run drug interaction analysis\n"
-        "/briefing — Get today's daily briefing now\n"
-        "/sos — EMERGENCY: instant crisis card\n"
-        "/help — Show this help\n\n"
-        "Or just send me a photo, PDF, voice note, or text!",
-        parse_mode="Markdown"
-    )
+    await update.message.reply_text(WELCOME, parse_mode="Markdown")
