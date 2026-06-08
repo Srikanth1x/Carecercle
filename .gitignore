@@ -17,6 +17,10 @@ venv/
 env/
 .venv/
 
+# Node
+node_modules/
+package-lock.json
+
 # Temp files
 *.tmp
 *.log
@@ -25,6 +29,9 @@ env/
 *.jpeg
 *.png
 *.pdf
+
+# Generated / large static assets
+web/static/abdm_b64.txt
 
 # IDE
 .vscode/
