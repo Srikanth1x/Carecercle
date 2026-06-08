@@ -1,6 +1,6 @@
 # Aayu — Progress Tracker
 
-Last updated: 2026-06-08
+Last updated: 2026-06-08 (session 2)
 
 ---
 
@@ -65,6 +65,12 @@ Last updated: 2026-06-08
 - [x] Multi-patient per caregiver — patient switcher dropdown, cc_patient cookie
 - [x] Share links — share_links table, generate/view routes, public share.html
 
+### Bot Fixes & Confirmations (2026-06-08 session 2)
+- [x] 7 AM daily briefing confirmed working in production (delivered 7:51 AM IST)
+- [x] /connect confirmed working on @GetAayuBot
+- [x] "Dr. Dr." double prefix fix in `bot/scheduler.py` TASK REMINDER (commit 2620f08)
+- [x] Vault + repo docs updated
+
 ### Sprint 2 — Scaffold DONE (2026-06-08)
 - [x] ABDM sandbox registration submitted (In Progress, NHA approval 2-4 days)
 - [x] abdm/abha_api.py — ABDM M1 API client (OTP send, verify, profile fetch)
@@ -85,7 +91,7 @@ Last updated: 2026-06-08
 - [ ] Update setup.html Step 2: OTP verification option (vs manual ABHA entry)
 - [ ] User action: send `/connect` to @GetAayuBot to re-link Telegram
 
-### Sprint 3 — Self-HIP Registration
+### Sprint 3 — Self-HIP Registration (STARTING 2026-06-09)
 - [ ] abdm/fhir_serializer.py — FHIR R4 JSON serialization
 - [ ] abdm/hip_client.py — ABDM HIP webhook handlers
 - [ ] Auto-push records to ABHA locker on upload
