@@ -50,9 +50,14 @@ async def _send_one_nudge(b, profile):
             days_away = (appt_date - today).days
             if days_away <= 14 and appt.get("prerequisite_status") == "pending" and appt.get("prerequisites"):
                 prereqs = ", ".join(appt["prerequisites"])
+                doc_name = (appt.get("doctors") or {}).get("name") or "appointment"
+                for _pfx in ("Dr. ", "Dr."):
+                    if doc_name.startswith(_pfx):
+                        doc_name = doc_name[len(_pfx):].strip()
+                        break
                 msg = (
                     f"📌 TASK REMINDER\n\n"
-                    f"Dr. {appt.get('doctors', {}).get('name', 'appointment')} is in {days_away} days.\n"
+                    f"Dr. {doc_name} is in {days_away} days.\n"
                     f"Prerequisites needed: {prereqs}\n\n"
                     "These haven't been done yet. Please schedule them soon."
                 )
