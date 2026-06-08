@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Verify ABHA{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-8">
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-7">
+
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <div class="abdm-logo" style="width:36px;height:36px;flex-shrink:0;"></div>
+      <div>
+        <h1 class="text-lg font-bold text-white">Verify ABHA ID</h1>
+        <p class="text-xs text-zinc-500">for {{ patient.full_name }}</p>
+      </div>
+    </div>
+
+    <!-- What this does -->
+    <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-300 mb-6">
+      Enter the mobile number linked to your parent's ABHA account.
+      We'll send an OTP to confirm their identity and automatically import their ABHA number.
+    </div>
+
+    <!-- Step 1: Mobile -->
+    <div id="step-mobile">
+      <label class="block text-sm font-medium text-zinc-300 mb-1">Mobile number linked to ABHA</label>
+      <div class="flex gap-2">
+        <span class="flex items-center px-3 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-400 text-sm">+91</span>
+        <input id="mobile-input" type="tel" maxlength="10" placeholder="98XXXXXXXX"
+               class="flex-1 rounded-lg px-3 py-2 text-sm bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500" />
+      </div>
+      <p id="mobile-error" class="text-red-400 text-xs mt-1 hidden"></p>
+      <button onclick="sendOtp()"
+              class="mt-4 w-full bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium py-2.5 rounded-lg transition-colors text-sm">
+        Send OTP
+      </button>
+    </div>
+
+    <!-- Step 2: OTP (hidden until OTP sent) -->
+    <div id="step-otp" class="hidden">
+      <p class="text-sm text-zinc-400 mb-4">OTP sent to +91 <span id="mobile-display" class="text-white font-medium"></span></p>
+      <label class="block text-sm font-medium text-zinc-300 mb-1">Enter 6-digit OTP</label>
+      <input id="otp-input" type="text" maxlength="6" placeholder="______"
+             class="w-full rounded-lg px-3 py-2 text-sm bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-teal-500 tracking-widest text-center text-lg font-mono" />
+      <p id="otp-error" class="text-red-400 text-xs mt-1 hidden"></p>
+      <div class="flex gap-2 mt-4">
+        <button onclick="resetFlow()"
+                class="flex-1 border border-zinc-700 text-zinc-400 hover:text-white font-medium py-2.5 rounded-lg transition-colors text-sm">
+          Back
+        </button>
+        <button onclick="verifyOtp()"
+                class="flex-1 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium py-2.5 rounded-lg transition-colors text-sm">
+          Verify
+        </button>
+      </div>
+      <button onclick="sendOtp(true)" class="mt-3 w-full text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+        Resend OTP
+      </button>
+    </div>
+
+    <!-- Success -->
+    <div id="step-success" class="hidden text-center py-4">
+      <div class="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <h2 class="text-lg font-bold text-white mb-1">ABHA Verified</h2>
+      <p id="success-abha" class="text-teal-400 font-mono text-sm mb-4"></p>
+      <a href="/dashboard" class="block w-full bg-teal-500 hover:bg-teal-400 text-zinc-950 font-medium py-2.5 rounded-lg transition-colors text-sm">
+        Back to Dashboard
+      </a>
+    </div>
+
+    <!-- Sandbox pending notice -->
+    <div id="sandbox-notice" class="hidden mt-4 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 text-xs text-amber-300">
+      ABDM sandbox credentials are pending NHA approval (2-4 days).
+      You can still enter your ABHA number manually on the
+      <a href="/setup" class="underline hover:text-amber-200">patient setup page</a>.
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let _txnId = null;
+  const patientId = "{{ patient.id }}";
+
+  function showError(el, msg) {
+    el.textContent = msg;
+    el.classList.remove("hidden");
+  }
+  function clearError(el) { el.classList.add("hidden"); }
+
+  async function sendOtp(resend = false) {
+    const mobile = document.getElementById("mobile-input").value.trim();
+    const err = document.getElementById("mobile-error");
+    clearError(err);
+    if (!/^\d{10}$/.test(mobile)) { showError(err, "Enter a valid 10-digit mobile number."); return; }
+
+    const btn = event?.target;
+    if (btn) btn.textContent = "Sending...";
+
+    const res = await fetch("/abha/send-otp", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({mobile})
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      if (data.error && data.error.includes("not yet active")) {
+        document.getElementById("sandbox-notice").classList.remove("hidden");
+      } else {
+        showError(err, data.error || "Failed to send OTP.");
+      }
+      if (btn) btn.textContent = "Send OTP";
+      return;
+    }
+
+    _txnId = data.txnId;
+    document.getElementById("mobile-display").textContent = mobile;
+    document.getElementById("step-mobile").classList.add("hidden");
+    document.getElementById("step-otp").classList.remove("hidden");
+  }
+
+  async function verifyOtp() {
+    const mobile = document.getElementById("mobile-input").value.trim();
+    const otp = document.getElementById("otp-input").value.trim();
+    const err = document.getElementById("otp-error");
+    clearError(err);
+    if (!/^\d{6}$/.test(otp)) { showError(err, "Enter the 6-digit OTP."); return; }
+
+    const btn = event?.target;
+    if (btn) btn.textContent = "Verifying...";
+
+    const res = await fetch("/abha/verify-otp", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({mobile, otp, txnId: _txnId, patientId})
+    });
+    const data = await res.json();
+
+    if (!data.ok) {
+      showError(err, data.error || "Verification failed.");
+      if (btn) btn.textContent = "Verify";
+      return;
+    }
+
+    document.getElementById("step-otp").classList.add("hidden");
+    document.getElementById("step-success").classList.remove("hidden");
+    const num = data.abhaNumber || "";
+    document.getElementById("success-abha").textContent =
+      num.length === 14 ? `${num.slice(0,2)}-${num.slice(2,6)}-${num.slice(6,10)}-${num.slice(10)}` : num;
+  }
+
+  function resetFlow() {
+    _txnId = null;
+    document.getElementById("step-otp").classList.add("hidden");
+    document.getElementById("step-mobile").classList.remove("hidden");
+    document.getElementById("otp-input").value = "";
+  }
+</script>
+{% endblock %}

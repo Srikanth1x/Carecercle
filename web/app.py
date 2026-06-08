@@ -202,6 +202,60 @@ async def setup_submit(
             "request": request, "error": str(e)
         })
 
+# ---- ABHA OTP Verification (Sprint 2) ----
+
+@app.get("/abha/verify")
+async def abha_verify_page(request: Request, user: dict = Depends(require_user)):
+    active_pid = request.cookies.get(_PATIENT_COOKIE)
+    patient = _get_active_patient(user["id"], active_pid)
+    if not patient:
+        return RedirectResponse("/setup")
+    return templates.TemplateResponse("abha_verify.html", {"request": request, "patient": patient})
+
+
+@app.post("/abha/send-otp")
+async def abha_send_otp(request: Request, user: dict = Depends(require_user)):
+    from config.settings import ABDM_CLIENT_ID
+    if not ABDM_CLIENT_ID:
+        return JSONResponse({"ok": False, "error": "ABDM sandbox not yet active. Enter ABHA number manually for now."}, status_code=503)
+    body = await request.json()
+    mobile = (body.get("mobile") or "").strip()
+    if not mobile or len(mobile) != 10:
+        return JSONResponse({"ok": False, "error": "Enter a valid 10-digit mobile number."}, status_code=400)
+    try:
+        from abdm.abha_api import generate_mobile_otp
+        result = await generate_mobile_otp(mobile)
+        return JSONResponse({"ok": True, "txnId": result.get("txnId") or result.get("transactionId")})
+    except Exception as e:
+        logger.exception("ABHA OTP send failed")
+        return JSONResponse({"ok": False, "error": "Could not reach ABDM. Try again."}, status_code=502)
+
+
+@app.post("/abha/verify-otp")
+async def abha_verify_otp(request: Request, user: dict = Depends(require_user)):
+    body = await request.json()
+    txn_id = body.get("txnId", "")
+    otp = body.get("otp", "").strip()
+    mobile = body.get("mobile", "").strip()
+    patient_id = body.get("patientId", "")
+    if not all([txn_id, otp, mobile, patient_id]):
+        return JSONResponse({"ok": False, "error": "Missing fields."}, status_code=400)
+    try:
+        from abdm.abha_api import verify_abha_by_mobile
+        from database.queries import save_abha_verification
+        profile = await verify_abha_by_mobile(mobile, otp, txn_id)
+        patient = save_abha_verification(patient_id, profile)
+        return JSONResponse({
+            "ok": True,
+            "abhaNumber": profile["abha_number"],
+            "abhaAddress": profile.get("abha_address"),
+            "name": profile.get("name_on_abha"),
+        })
+    except Exception as e:
+        logger.exception("ABHA OTP verify failed")
+        return JSONResponse({"ok": False, "error": "OTP verification failed. Check the code and try again."}, status_code=400)
+
+
 # ---- Add another patient ----
 
 @app.get("/patient/new")

@@ -18,7 +18,7 @@ def create_patient(user_id: str, data: dict) -> dict:
     name = data.get("full_name", "patient")
     first = name.split()[0].lower()
     fallback_abha_id = str(random.randint(10000000000000, 99999999999999))
-    fallback_abha_address = f"{first}.{random.randint(1000, 9999)}@carecircle"
+    fallback_abha_address = f"{first}.{random.randint(1000, 9999)}@aayu"
     record = {
         "user_id": user_id,
         "abha_id": data.get("abha_id") or fallback_abha_id,
@@ -194,3 +194,30 @@ def get_share_link_by_token(token: str) -> dict | None:
     result = db.table("share_links").select("*") \
         .eq("token", token).gte("expires_at", now).execute()
     return result.data[0] if result.data else None
+
+
+def save_abha_verification(patient_id: str, profile: dict) -> dict:
+    """Upsert ABHA verification result and mark patient as verified."""
+    db = get_client()
+    db.table("abha_verifications").upsert({
+        "patient_id": patient_id,
+        "abha_number": profile["abha_number"],
+        "abha_address": profile.get("abha_address"),
+        "name_on_abha": profile.get("name_on_abha"),
+        "gender": profile.get("gender"),
+        "year_of_birth": profile.get("year_of_birth"),
+        "mobile_last4": profile.get("mobile_last4"),
+        "raw_response": profile.get("raw_response"),
+    }, on_conflict="patient_id").execute()
+
+    from datetime import datetime, timezone
+    db.table("patients").update({
+        "abha_id": profile["abha_number"],
+        "abha_address": profile.get("abha_address"),
+        "abha_verified": True,
+        "abha_verified_at": datetime.now(timezone.utc).isoformat(),
+        "abha_mobile_last4": profile.get("mobile_last4"),
+    }).eq("id", patient_id).execute()
+
+    result = db.table("patients").select("*").eq("id", patient_id).execute()
+    return result.data[0]

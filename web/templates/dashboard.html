@@ -9,12 +9,20 @@
     <h1 class="text-2xl font-bold text-white">{{ patient.full_name }}</h1>
     <p class="text-sm text-zinc-400 mt-1">
       {% if patient.abha_id %}
+        {% if patient.abha_verified %}
+        <span class="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded text-xs mr-2">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          ABHA Verified &bull; {{ patient.abha_id[:2] }}-{{ patient.abha_id[2:6] }}-{{ patient.abha_id[6:10] }}-{{ patient.abha_id[10:] }}
+        </span>
+        {% else %}
         <span class="inline-flex items-center gap-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-xs mr-2">
           <div class="abdm-logo" style="width:16px;height:16px;"></div>
           {{ patient.abha_id[:2] }}-{{ patient.abha_id[2:6] }}-{{ patient.abha_id[6:10] }}-{{ patient.abha_id[10:] }}
         </span>
+        <a href="/abha/verify" class="inline-flex items-center gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-teal-400 px-2 py-0.5 rounded text-xs mr-2 transition-colors">Verify ABHA</a>
+        {% endif %}
       {% else %}
-        <a href="/setup" class="inline-flex items-center gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-teal-400 px-2 py-0.5 rounded text-xs mr-2 transition-colors">+ Add ABHA</a>
+        <a href="/abha/verify" class="inline-flex items-center gap-1 bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-teal-400 px-2 py-0.5 rounded text-xs mr-2 transition-colors">+ Verify ABHA</a>
       {% endif %}
       {{ patient.address_city }}{% if patient.address_city and patient.address_state %}, {% endif %}{{ patient.address_state }} &bull;
       Blood Group: {{ patient.blood_group or "N/A" }}
